@@ -46,30 +46,73 @@ class DiseaseResult(BaseModel):
     remedies: str
     resources: List[Dict[str, str]]
 
-symptoms_advisor = Agent(
-    role="Crop Symptoms Specialist",
-    goal="Identify and describe common symptoms of crop diseases.",
-    backstory="An AI agronomist specializing in recognizing and describing symptoms of crop diseases for farmers.",
-    verbose=True,
-    llm=llm
-)
+class Scheme(BaseModel):
+    name: str
+    category: str
+    description: str
+    link: str
 
-remedy_advisor = Agent(
-    role="Agro Remedy Consultant",
-    goal="Suggest effective solutions for crop diseases.",
-    backstory="An expert agronomist helping farmers treat plant infections.",
-    verbose=True,
-    llm=llm
-)
 
-resource_link_finder = Agent(
-    role="Agro Web Researcher",
-    goal="Find helpful guides and links about crop disease treatments.",
-    backstory="An AI assistant with access to the web for agricultural research.",
-    tools=[serper_tool],
-    verbose=True,
-    llm=llm
-)
+
+
+class SchemeFilterTool(BaseTool):
+    name: str = Field(default="SchemeFilterTool", description="Filters schemes based on user criteria with priority.")
+    description: str = Field(default="Filters government schemes by prioritizing location, then occupation, then caste, gender, and landholding.")
+
+    def _run(self, schemes: List[Dict[str, Any]], user_data: dict) -> List[Dict[str, Any]]:
+        try:
+            filtered_schemes = []
+            for scheme in schemes:
+                location = user_data.get('location', '').lower()
+                occupation = user_data.get('occupation', '').lower()
+                caste = user_data.get('caste', '').lower()
+                gender = user_data.get('gender', '').lower()
+                landholding = user_data.get('landholding', '').lower()
+
+                name_lower = scheme.get('name', '').lower()
+                category_lower = scheme.get('category', '').lower()
+                desc_lower = scheme.get('description', '').lower()
+
+                location_match = (
+                    location in name_lower or
+                    location in desc_lower or
+                    location in scheme.get('link', '').lower() or
+                    'assam' in desc_lower
+                )
+
+                occupation_match = (
+                    occupation in category_lower or
+                    occupation in desc_lower or
+                    'farmer' in desc_lower or
+                    'agriculture' in category_lower or
+                    'agribusiness' in category_lower
+                )
+
+                other_match = (
+                    caste in desc_lower or
+                    gender in desc_lower or
+                    (landholding and (
+                        'land' in desc_lower or
+                        'small' in desc_lower or
+                        'marginal' in desc_lower or
+                        landholding in desc_lower
+                    ))
+                )
+
+                if location_match or occupation_match or other_match:
+                    filtered_schemes.append(scheme)
+
+            filtered_schemes.sort(key=lambda x: (
+                user_data.get('location', '').lower() not in x.get('description', '').lower() and
+                user_data.get('location', '').lower() not in x.get('name', '').lower() and
+                user_data.get('location', '').lower() not in x.get('link', '').lower(),
+                user_data.get('occupation', '').lower() not in x.get('category', '').lower() and
+                user_data.get('occupation', '').lower() not in x.get('description', '').lower()
+            ))
+            return filtered_schemes[:20]
+        except Exception as e:
+            logger.error(f"Error filtering schemes: {str(e)}")
+            return f"Error filtering schemes: {e}"
 
 class CropDiseaseAPI(BaseTool):
     name: str = Field(default="CropDiseaseAPI", description="Tool to detect crop diseases from image using external ML API.")
@@ -92,6 +135,46 @@ class CropDiseaseAPI(BaseTool):
             return f"Error calling Crop Disease API: {e}"
         
 crop_disease_tool = CropDiseaseAPI()
+scheme_filter_tool = SchemeFilterTool()
+
+
+scheme_researcher = Agent(
+    role="Scheme Researcher",
+    goal="Search and filter government agricultural schemes based on user criteria, prioritizing location, then occupation, then other criteria.",
+    backstory="An expert in finding and filtering relevant government schemes for farmers using web search tools.",
+    tools=[serper_tool, scheme_filter_tool],
+    verbose=True,
+    llm=llm
+)
+
+
+symptoms_advisor = Agent(
+    role="Crop Symptoms Specialist",
+    goal="Identify and describe common symptoms of crop diseases.",
+    backstory="An AI agronomist specializing in recognizing and describing symptoms of crop diseases for farmers.",
+    verbose=True,
+    llm=llm
+)
+
+
+
+remedy_advisor = Agent(
+    role="Agro Remedy Consultant",
+    goal="Suggest effective solutions for crop diseases.",
+    backstory="An expert agronomist helping farmers treat plant infections.",
+    verbose=True,
+    llm=llm
+)
+
+resource_link_finder = Agent(
+    role="Agro Web Researcher",
+    goal="Find helpful guides and links about crop disease treatments.",
+    backstory="An AI assistant with access to the web for agricultural research.",
+    tools=[serper_tool],
+    verbose=True,
+    llm=llm
+)
+
 
 @app.route('/disease', methods=['GET', 'POST'])
 def disease():
@@ -277,6 +360,122 @@ def disease():
 
     return render_template('disease.html', error_message=error_message, result=result, form_submitted=form_submitted)
 
+@app.route('/schemes', methods=['GET', 'POST'])
+def schemes():
+    error_message = None
+    schemes = []
+    form_submitted = False
+    output_file = 'schemes_found.json'
+
+    if request.method == 'POST':
+        try:
+            user_data = {
+                'name': request.form.get('name', ''),
+                'age': request.form.get('age', ''),
+                'caste': request.form.get('caste', ''),
+                'location': request.form.get('location', ''),
+                'occupation': request.form.get('occupation', ''),
+                'gender': request.form.get('gender', ''),
+                'landholding': request.form.get('landholding', '')
+            }
+
+            required_fields = ['name', 'caste', 'location', 'occupation', 'gender', 'landholding']
+            if not all(user_data[field] for field in required_fields):
+                error_message = "All fields are required."
+                return render_template('schemes.html', error_message=error_message, schemes=schemes, form_submitted=True)
+
+            search_task = Task(
+                description=(
+                    f"Search for government agricultural schemes in India relevant to a {user_data['occupation']} "
+                    f"with caste {user_data['caste']}, gender {user_data['gender']}, located in {user_data['location']}, "
+                    f"and owning {user_data['landholding']} acres of land. Use the SchemeFilterTool to filter schemes "
+                    f"by prioritizing location, then occupation, then caste, gender, and landholding. "
+                    f"Return a JSON list of up to 50 schemes with name, category, description, and official link, "
+                    f"ensuring the output is a valid JSON string without markdown code fences, "
+                    f"compatible with the following schema: "
+                    f"{json.dumps([{'name': 'string', 'category': 'string', 'description': 'string', 'link': 'string'}])}"
+                ),
+                expected_output="A JSON list of up to 50 schemes with name, category, description, and link.",
+                agent=scheme_researcher,
+                output_file=output_file
+            )
+
+            crew = Crew(
+                agents=[scheme_researcher],
+                tasks=[search_task],
+                verbose=True
+            )
+
+            @retry(
+                stop=stop_after_attempt(3),
+                wait=wait_exponential(multiplier=1, min=4, max=10),
+                retry=retry_if_exception_type(Exception),
+                after=lambda retry_state: logger.debug(f"Retry attempt {retry_state.attempt_number} failed with {retry_state.outcome.exception()}")
+            )
+            def execute_crew():
+                return crew.kickoff()
+
+            try:
+                result = execute_crew()
+            except Exception as e:
+                logger.error(f"Crew execution failed after retries: {str(e)}")
+                error_message = "The scheme search service is temporarily unavailable. Please try again later."
+                return render_template('schemes.html', error_message=error_message, schemes=schemes, form_submitted=True)
+
+            try:
+                if os.path.exists(output_file):
+                    with open(output_file, 'r', encoding='utf-8') as f:
+                        content = f.read().strip()
+
+                    raw_output_file = 'schemes_found_raw.txt'
+                    with open(raw_output_file, 'w', encoding='utf-8') as f:
+                        f.write(content)
+                    logger.debug(f"Raw output saved to {raw_output_file}: {content}")
+
+                    clean_content = content
+                    if content.startswith('```json') and content.endswith('```'):
+                        clean_content = '\n'.join(content.splitlines()[1:-1]).strip()
+                    elif content.startswith('```') and content.endswith('```'):
+                        clean_content = '\n'.join(content.splitlines()[1:-1]).strip()
+
+                    if not clean_content:
+                        error_message = "Output file is empty after cleaning."
+                        logger.error(error_message)
+                        return render_template('schemes.html', error_message=error_message, schemes=schemes, form_submitted=True)
+
+                    try:
+                        schemes_data = json.loads(clean_content)
+                    except json.JSONDecodeError as e:
+                        logger.error(f"Error parsing JSON from {output_file}: {e}")
+                        error_message = f"Error processing scheme data: {e}"
+                        return render_template('schemes.html', error_message=error_message, schemes=schemes, form_submitted=True)
+
+                    if not isinstance(schemes_data, list):
+                        error_message = "Schemes data is not a valid JSON list."
+                        logger.error(error_message)
+                        return render_template('schemes.html', error_message=error_message, schemes=schemes, form_submitted=True)
+
+                    with open(output_file, 'w', encoding='utf-8') as f:
+                        json.dump(schemes_data, f, indent=2)
+                    logger.debug(f"Saved cleaned JSON to {output_file}")
+
+                    schemes = [Scheme(**scheme) for scheme in schemes_data if isinstance(scheme, dict)]
+                    if not schemes:
+                        error_message = "No valid schemes found matching your criteria."
+                        logger.warning(error_message)
+                else:
+                    error_message = f"Output file {output_file} not found."
+                    logger.error(error_message)
+            except Exception as e:
+                logger.error(f"Error processing {output_file}: {e}")
+                error_message = f"Error processing scheme data: {e}"
+
+            form_submitted = True
+        except Exception as e:
+            logger.error(f"Error fetching scheme data: {e}")
+            error_message = "An unexpected error occurred during scheme search. Please try again later."
+
+    return render_template('schemes.html', schemes=schemes, error_message=error_message, form_submitted=form_submitted)
 
 @app.route('/')
 def index():

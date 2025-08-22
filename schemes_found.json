@@ -1,0 +1,50 @@
+[
+  {
+    "name": "National Mission for Sustainable Agriculture (NMSA)",
+    "category": "Agriculture",
+    "description": "Promotes sustainable agriculture practices to help farmers cope with climate change.",
+    "link": "https://agri-horti.assam.gov.in/schemes"
+  },
+  {
+    "name": "Equity Grant Scheme",
+    "category": "Agriculture",
+    "description": "Provides equity grants to farmers.",
+    "link": "https://agri-horti.assam.gov.in/schemes/equity-grant-scheme-egs"
+  },
+  {
+    "name": "Credit Guarantee Fund Scheme (CGFS)",
+    "category": "Agriculture",
+    "description": "Provides credit guarantee to farmers.",
+    "link": "https://agri-horti.assam.gov.in/schemes/credit-guarantee-fund-scheme-cgfs"
+  },
+  {
+    "name": "Mukhya Mantri Krishi Sa Sajuli Yojana",
+    "category": "Agriculture",
+    "description": "Financial assistance to small and marginal farmers.",
+    "link": "https://www.myscheme.gov.in/schemes/mmkssy-assam"
+  },
+  {
+    "name": "National Food Security Mission (NFSM)",
+    "category": "Agriculture",
+    "description": "A scheme to increase the production of rice, wheat and pulses on a sustainable basis in the identified districts of the country.",
+    "link": "https://agri-horti.assam.gov.in/schemes"
+  },
+  {
+    "name": "Rashtriya Krishi Vikas Yojana (RKVY)",
+    "category": "Agriculture",
+    "description": "A state plan scheme to achieve 4% annual growth in agriculture sector.",
+    "link": "https://agri-horti.assam.gov.in/schemes/rashtriya-krishi-vikas-yojana-rkvy-0"
+  },
+  {
+    "name": "NMAET: Sub-Mission on Agricultural Mechanization (SMAM)",
+    "category": "Agriculture Mechanization",
+    "description": "Promotes agricultural mechanization.",
+    "link": "https://diragri.assam.gov.in/portlet-innerpage/schemes-and-program-0"
+  },
+  {
+    "name": "Bringing Green Revolution to Eastern India (BGREI)",
+    "category": "Agriculture",
+    "description": "Aims to increase agricultural production in eastern India.",
+    "link": "https://diragri.assam.gov.in/portlet-innerpage/schemes-and-program-0"
+  }
+]

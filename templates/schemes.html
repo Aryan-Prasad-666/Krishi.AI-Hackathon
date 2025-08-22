@@ -1,0 +1,307 @@
+{% extends 'base.html' %}
+
+{% block title %}Krishi.ai - Government Schemes{% endblock %}
+
+{% block extra_css %}
+<style>
+    .schemes-section {
+        padding: 80px 0;
+        background: url('https://images.pexels.com/photos/259280/pexels-photo-259280.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2') no-repeat center center;
+        background-size: cover;
+        background-attachment: fixed;
+        min-height: 100vh; /* Ensure consistent height */
+        text-align: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Semi-transparent overlay for readability */
+    .schemes-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.7); /* Increased opacity */
+        z-index: -1;
+    }
+
+    .schemes-section h2 {
+        font-size: 38px;
+        margin-bottom: 20px;
+        color: var(--dark-color);
+        text-transform: uppercase;
+    }
+
+    .schemes-section p {
+        font-size: 18px;
+        line-height: 1.6;
+        max-width: 700px;
+        margin: 0 auto 40px;
+        color: #3a2b1f;
+    }
+
+    .form-container {
+        max-width: 600px;
+        margin: 0 auto 40px;
+        padding: 20px;
+        background: #fff;
+        border-radius: 15px;
+        border: 1px solid var(--accent-color);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-container form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .form-container input, .form-container select {
+        padding: 12px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .form-container button {
+        background: linear-gradient(45deg, var(--accent-color), #d4a017);
+        color: var(--dark-color);
+        padding: 12px;
+        font-size: 18px;
+        font-weight: 700;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .form-container button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(232, 185, 35, 0.6);
+    }
+
+    .schemes-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        padding: 0 20px;
+        margin-bottom: 40px;
+    }
+
+    .scheme-card {
+        background: #fff;
+        padding: 20px;
+        border-radius: 15px;
+        border: 1px solid var(--accent-color);
+        position: relative;
+        overflow: hidden;
+        min-height: 250px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .scheme-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px; /* Fixed to match gradient bar */
+        background: linear-gradient(90deg, var(--accent-color), #d4a017);
+    }
+
+    .scheme-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .scheme-card h3 {
+        font-size: 22px;
+        margin-bottom: 10px;
+        color: var(--dark-color);
+    }
+
+    .scheme-card .category {
+        font-size: 14px;
+        color: #3a2b1f;
+        margin-bottom: 10px;
+        text-transform: capitalize;
+    }
+
+    .scheme-card p {
+        font-size: 16px;
+        color: #3a2b1f;
+        flex-grow: 1;
+    }
+
+    .scheme-card .learn-more {
+        background: var(--accent-color);
+        color: var(--dark-color);
+        padding: 10px 20px;
+        text-decoration: none;
+        font-size: 16px;
+        font-weight: 600;
+        border-radius: 25px;
+        align-self: flex-end;
+        transition: background 0.3s ease;
+    }
+
+    .scheme-card .learn-more:hover {
+        background: #d4a017;
+    }
+
+    .error-message, .no-schemes-message {
+        color: #d32f2f;
+        font-size: 16px;
+        margin-bottom: 20px;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 10px;
+        border-radius: 8px;
+    }
+
+    /* Loading animation */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+    }
+
+    .spinner {
+        border: 8px solid #f3f3f3;
+        border-top: 8px solid var(--accent-color);
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+        .schemes-section h2 {
+            font-size: 32px;
+        }
+
+        .schemes-section p {
+            font-size: 16px;
+        }
+
+        .form-container {
+            padding: 15px;
+        }
+
+        .scheme-card {
+            min-height: 300px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+</div>
+
+<div class="schemes-section">
+    <div class="container">
+        <h2 data-translate="schemes_title">Find Government Schemes</h2>
+        <p data-translate="schemes_description">Enter your details to discover tailored government schemes for agriculture, finance, and governance.</p>
+
+        <div class="form-container">
+            <form method="POST" action="/schemes" id="schemesForm">
+                <input type="text" name="name" placeholder="Name" data-translate-placeholder="form_name_placeholder">
+                <input type="number" name="age" placeholder="Age" data-translate-placeholder="form_age_placeholder" min="18" max="100">
+                <select name="caste" data-translate-placeholder="form_caste_placeholder">
+                    <option value="" disabled selected>Select Caste</option>
+                    <option value="General">General</option>
+                    <option value="OBC">OBC</option>
+                    <option value="SC">SC</option>
+                    <option value="ST">ST</option>
+                </select>
+                <input type="text" name="location" placeholder="Location (e.g., Bengaluru, Karnataka)" data-translate-placeholder="form_location_placeholder">
+                <select name="occupation" data-translate-placeholder="form_occupation_placeholder">
+                    <option value="" disabled selected>Select Occupation</option>
+                    <option value="Farmer">Farmer</option>
+                    <option value="Entrepreneur">Entrepreneur</option>
+                    <option value="Laborer">Laborer</option>
+                    <option value="Other">Other</option>
+                </select>
+                <select name="gender" data-translate-placeholder="form_gender_placeholder">
+                    <option value="" disabled selected>Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+                <input type="number" name="landholding" placeholder="Landholding (in acres)" data-translate-placeholder="form_landholding_placeholder" min="0" step="0.1">
+                <button type="submit" data-translate="form_submit">Find Schemes</button>
+            </form>
+        </div>
+
+        {% if error_message %}
+            <div class="error-message">{{ error_message }}</div>
+        {% endif %}
+
+        {% if schemes %}
+        <h3 data-translate="all_schemes_title">Available Schemes</h3>
+        <div class="schemes-grid">
+            {% for scheme in schemes %}
+            <div class="scheme-card">
+                <h3>{{ scheme.name }}</h3>
+                <div class="category">{{ scheme.category }}</div>
+                <p>{{ scheme.description }}</p>
+                <a href="{{ scheme.link }}" class="learn-more" data-translate="learn_more">Learn More</a>
+            </div>
+            {% endfor %}
+        </div>
+        {% elif form_submitted %}
+        <p class="no-schemes-message" data-translate="no_schemes">No schemes found for your criteria.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Animate elements on scroll
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.animation = 'fadeInUp 1s ease-out forwards';
+            }
+        });
+    }, { threshold: 0.2 });
+
+    document.querySelectorAll('.scheme-card, .schemes-section h2, .schemes-section h3, .schemes-section p').forEach(el => {
+        observer.observe(el);
+    });
+
+    // Loading animation
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('schemesForm');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
+        // Hide loader when page loads
+        loadingOverlay.style.display = 'none';
+
+        // Show loader on form submission
+        form.addEventListener('submit', () => {
+            loadingOverlay.style.display = 'flex';
+        });
+    });
+</script>
+{% endblock %}
