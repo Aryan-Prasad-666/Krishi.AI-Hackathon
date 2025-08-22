@@ -1,0 +1,248 @@
+{% extends 'base.html' %}
+
+{% block title %}Krishi.ai - Empowering Rural India{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero {
+        height: 100vh;
+        background: url('https://images.pexels.com/photos/96715/pexels-photo-96715.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2') no-repeat center center/cover;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(180deg, rgba(58, 47, 30, 0.5), rgba(58, 47, 30, 0.7));
+    }
+
+    .hero-content {
+        position: relative;
+        max-width: 900px;
+        padding: 20px;
+        animation: fadeInUp 1.2s ease-out;
+    }
+
+    .hero-content h1 {
+        font-size: 58px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        color: var(--accent-color);
+        text-shadow: 0 0 10px rgba(232, 185, 35, 0.5);
+    }
+
+    .hero-content p {
+        font-size: 20px;
+        line-height: 1.6;
+        margin-bottom: 40px;
+        color: var(--light-color);
+    }
+
+    .cta-button {
+        background: linear-gradient(45deg, var(--accent-color), #d4a017);
+        color: var(--dark-color);
+        padding: 15px 40px;
+        text-decoration: none;
+        font-size: 18px;
+        font-weight: 700;
+        border-radius: 50px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 4px 15px rgba(232, 185, 35, 0.4);
+    }
+
+    .cta-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(232, 185, 35, 0.6);
+        color: var(--dark-color);
+    }
+
+    .section {
+        padding: 80px 0;
+        text-align: center;
+        background: var(--light-color);
+    }
+
+    .section h2 {
+        font-size: 38px;
+        margin-bottom: 20px;
+        color: var(--dark-color);
+        text-transform: uppercase;
+    }
+
+    .section p {
+        font-size: 18px;
+        line-height: 1.6;
+        max-width: 700px;
+        margin: 0 auto 40px;
+        color: #5a4b2f;
+    }
+
+    .features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        padding: 0 20px;
+    }
+
+    .feature-card {
+        background: #fff;
+        padding: 30px;
+        border-radius: 15px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 1px solid var(--accent-color);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .feature-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--accent-color), #d4a017);
+    }
+
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-card h3 {
+        font-size: 24px;
+        margin-bottom: 15px;
+        color: var(--dark-color);
+    }
+
+    .feature-card p {
+        font-size: 16px;
+        color: #5a4b2f;
+    }
+
+    .feature-card i {
+        font-size: 30px;
+        color: var(--accent-color);
+        margin-bottom: 15px;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .hero-content h1 {
+            font-size: 40px;
+            letter-spacing: 2px;
+        }
+
+        .hero-content p {
+            font-size: 16px;
+        }
+
+        .section h2 {
+            font-size: 32px;
+        }
+
+        .feature-card {
+            padding: 20px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <div class="hero-content">
+        <h1 data-translate="hero_title">Empowering Rural India</h1>
+        <p data-translate="hero_description">Krishi.ai empowers rural India with AI-driven tools, nurturing fields, finances, and futures for thriving villages.</p>
+        <a href="/schemes" class="cta-button" data-translate="hero_cta">Get Started</a>
+    </div>
+</div>
+
+<div class="section">
+    <div class="container">
+        <h2 data-translate="solutions_title">Our Rural Solutions</h2>
+        <p data-translate="solutions_description">Empowering farmers and villages with AI-driven tools designed for accessibility and impact.</p>
+        <div class="features">
+            <div class="feature-card">
+                <i class="fas fa-seedling"></i>
+                <h3 data-translate="feature_farming_title">Smart Farming</h3>
+                <p data-translate="feature_farming_description">Real-time crop planning, disease detection, and pest control with AI-powered insights.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-piggy-bank"></i>
+                <h3 data-translate="feature_finance_title">Financial Tools</h3>
+                <p data-translate="feature_finance_description">Voice-activated recordkeeping and financial guidance for rural prosperity.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-gavel"></i>
+                <h3 data-translate="feature_governance_title">Governance Support</h3>
+                <p data-translate="feature_governance_description">Navigate schemes and resolve disputes with our AI legal assistant.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <div class="container">
+        <h2 data-translate="why_krishi_title">Why Krishi.ai?</h2>
+        <p data-translate="why_krishi_description">Our platform blends advanced AI with a user-friendly design, delivering multilingual support tailored for rural India’s needs.</p>
+        <a href="/about" class="cta-button" data-translate="why_krishi_cta">Learn More</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Initialize hero background position and scroll to top on load
+    document.addEventListener('DOMContentLoaded', () => {
+        const hero = document.querySelector('.hero');
+        if (hero) {
+            hero.style.backgroundPositionY = '0px'; // Reset background position
+            window.scrollTo(0, 0); // Force scroll to top
+        }
+    });
+
+    // Parallax effect for hero background
+    window.addEventListener('scroll', () => {
+        const hero = document.querySelector('.hero');
+        if (hero) {
+            const scrollPosition = window.pageYOffset;
+            hero.style.backgroundPositionY = `${scrollPosition * 0.3}px`;
+        }
+    });
+
+    // Animate elements on scroll
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.animation = 'fadeInUp 1s ease-out forwards';
+            }
+        });
+    }, { threshold: 0.2 });
+
+    document.querySelectorAll('.feature-card, .section h2, .section p').forEach(el => {
+        observer.observe(el);
+    });
+</script>
+{% endblock %}
