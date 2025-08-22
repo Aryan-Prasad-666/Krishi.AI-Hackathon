@@ -1,0 +1,33 @@
+{
+  "disease": "Late blight",
+  "plant": "Tomato",
+  "symptoms": "Late blight on tomatoes presents as irregularly shaped, water-soaked lesions on leaves, often with white, cottony growth on the undersides, leading to fruit rot.",
+  "remedies": "Prune infected leaves promptly and dispose of them properly. Apply copper-based fungicides preventatively, following label instructions. Ensure good air circulation by spacing plants adequately. Water plants at the base to avoid wetting foliage. Use resistant tomato varieties whenever possible. Regularly inspect plants for early signs of the disease. Apply a baking soda spray (1 tsp per quart of water) as a natural remedy. Remove and destroy all tomato plant debris at the end of the season. Consider using chlorothalonil or mancozeb fungicides for severe infections. Rotate crops annually to prevent soilborne inoculum buildup.",
+  "resources": [
+    {
+      "title": "Late blight of tomato and potato | UMN Extension",
+      "link": "https://extension.umn.edu/disease-management/late-blight",
+      "summary": "Provides information on late blight, including management strategies such as planting disease-free plants, keeping leaves dry, and rotating crops."
+    },
+    {
+      "title": "Late Blight of Tomatoes | Extension | West Virginia University",
+      "link": "https://extension.wvu.edu/lawn-gardening-pests/plant-disease/fruit-vegetable-diseases/late-blight-tomatoes",
+      "summary": "Discusses the use of fungicides as the most effective way to prevent late blight. Recommends protectant fungicides for conventional gardeners and copper products for organic gardeners."
+    },
+    {
+      "title": "Tomato Late Blight | NC State Extension Publications",
+      "link": "https://content.ces.ncsu.edu/tomato-late-blight",
+      "summary": "Recommends applying fungicides preventatively at 7-10 day intervals, or 5-7 day intervals after disease detection. Stresses the importance of alternating products."
+    },
+    {
+      "title": "Late Blight of Tomato - Missouri Botanical Garden",
+      "link": "https://www.missouribotanicalgarden.org/gardens-gardening/your-garden/help-for-the-home-gardener/advice-tips-resources/insects-pests-and-problems/diseases/fungal-spots/late-blight-of-tomato",
+      "summary": "Suggests using a copper-based fungicide upon identification of symptoms and reapplying every 7\u201310 days. Also mentions organic strategies."
+    },
+    {
+      "title": "Tomato-Potato Late Blight in the Home Garden - Penn State Extension",
+      "link": "https://extension.psu.edu/tomato-potato-late-blight-in-the-home-garden/",
+      "summary": "Explains how fungicides disappear over time and recommends cultural practices to minimize disease."
+    }
+  ]
+}

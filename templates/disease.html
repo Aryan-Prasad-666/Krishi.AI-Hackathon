@@ -1,0 +1,440 @@
+{% extends 'base.html' %}
+
+{% block title %}Krishi.ai - Crop Disease Detection{% endblock %}
+
+{% block extra_css %}
+<style>
+    .disease-section {
+        padding: 80px 0;
+        background: url('https://images.pexels.com/photos/21393/pexels-photo.jpg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2') no-repeat center center;
+        background-size: cover;
+        background-attachment: fixed;
+        min-height: 100vh;
+        text-align: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    .disease-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(180deg, rgba(58, 47, 30, 0.8), rgba(58, 47, 30, 0.9));
+        z-index: -1;
+    }
+
+    .disease-section h2 {
+        font-size: 42px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: var(--light-color);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .disease-section p {
+        font-size: 18px;
+        line-height: 1.8;
+        max-width: 800px;
+        margin: 0 auto 40px;
+        color: var(--light-color);
+        opacity: 0.9;
+    }
+
+    .form-container {
+        max-width: 700px;
+        margin: 0 auto 40px;
+        padding: 30px;
+        background: #fff;
+        border-radius: 20px;
+        border: 2px solid var(--accent-color);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        transition: transform 0.3s ease;
+    }
+
+    .form-container:hover {
+        transform: translateY(-5px);
+    }
+
+    .form-container form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        align-items: center;
+    }
+
+    .form-container input[type="file"] {
+        padding: 15px;
+        font-size: 16px;
+        border: 2px solid var(--accent-color);
+        border-radius: 10px;
+        background: #f9f9f9;
+        width: 100%;
+        max-width: 500px;
+        transition: border-color 0.3s ease;
+    }
+
+    .form-container input[type="file"]:focus {
+        outline: none;
+        border-color: #d4a017;
+    }
+
+    .form-container button {
+        background: linear-gradient(45deg, var(--accent-color), #d4a017);
+        color: var(--dark-color);
+        padding: 15px 50px;
+        font-size: 18px;
+        font-weight: 700;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .form-container button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(232, 185, 35, 0.5);
+        background: linear-gradient(45deg, #d4a017, var(--accent-color));
+    }
+
+    .result-card {
+        background: #fff;
+        padding: 30px;
+        border-radius: 20px;
+        border: 2px solid var(--accent-color);
+        margin: 0 auto 40px;
+        max-width: 900px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        position: relative;
+        overflow: hidden;
+        display: grid;
+        gap: 20px;
+    }
+
+    .result-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 6px;
+        background: linear-gradient(90deg, var(--accent-color), #d4a017);
+    }
+
+    .result-card h3 {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: var(--dark-color);
+        text-align: center;
+    }
+
+    .result-card .result-item {
+        display: grid;
+        grid-template-columns: 1fr 3fr;
+        gap: 15px;
+        padding: 15px 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .result-card .result-item:last-child {
+        border-bottom: none;
+    }
+
+    .result-card .result-label {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--accent-color);
+    }
+
+    .result-card .result-value {
+        font-size: 16px;
+        color: #3a2b1f;
+        line-height: 1.6;
+    }
+
+    .result-card .remedies {
+        display: block;
+        margin-top: 20px;
+    }
+
+    .result-card .remedies h4 {
+        font-size: 22px;
+        color: var(--dark-color);
+        margin-bottom: 15px;
+    }
+
+    .result-card .remedies ul {
+        list-style-type: none;
+        padding-left: 0;
+    }
+
+    .result-card .remedies ul li {
+        font-size: 16px;
+        color: #3a2b1f;
+        margin-bottom: 10px;
+        position: relative;
+        padding-left: 25px;
+    }
+
+    .result-card .remedies ul li::before {
+        content: '✓';
+        position: absolute;
+        left: 0;
+        color: var(--accent-color);
+        font-size: 18px;
+    }
+
+    .result-card .resources h4 {
+        font-size: 22px;
+        color: var(--dark-color);
+        margin-bottom: 15px;
+    }
+
+    .result-card .resources ul {
+        list-style-type: none;
+        padding-left: 0;
+    }
+
+    .result-card .resources ul li {
+        font-size: 16px;
+        color: #3a2b1f;
+        margin-bottom: 15px;
+        position: relative;
+        padding-left: 30px;
+    }
+
+    .result-card .resources ul li::before {
+        content: '🔗';
+        position: absolute;
+        left: 0;
+        color: var(--accent-color);
+        font-size: 18px;
+    }
+
+    .result-card .resources a {
+        color: var(--accent-color);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .result-card .resources a:hover {
+        text-decoration: underline;
+        color: #d4a017;
+    }
+
+    .error-message, .no-result-message {
+        color: #d32f2f;
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 15px;
+        border-radius: 10px;
+        border: 1px solid #d32f2f;
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+    }
+
+    .spinner {
+        border: 10px solid #f3f3f3;
+        border-top: 10px solid var(--accent-color);
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        animation: spin 0.8s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+        .disease-section h2 {
+            font-size: 34px;
+        }
+
+        .disease-section p {
+            font-size: 16px;
+        }
+
+        .form-container {
+            padding: 20px;
+            margin: 0 15px;
+        }
+
+        .result-card {
+            padding: 20px;
+            margin: 0 15px;
+        }
+
+        .result-card .result-item {
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .result-card .result-label {
+            font-size: 16px;
+        }
+
+        .result-card .result-value {
+            font-size: 14px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+</div>
+
+<div class="disease-section">
+    <div class="container">
+        <h2 data-translate="disease_title">Crop Disease Detection</h2>
+        <p data-translate="disease_description">Upload an image of your crop to identify potential diseases and receive tailored treatment recommendations.</p>
+
+        <div class="form-container">
+            <form method="POST" action="/disease" enctype="multipart/form-data" id="diseaseForm">
+                <input type="file" name="image" accept="image/*" data-translate-placeholder="form_image_placeholder">
+                <button type="submit" data-translate="form_submit">Analyze Image</button>
+            </form>
+        </div>
+
+        {% if error_message %}
+            <div class="error-message">{{ error_message }}</div>
+        {% endif %}
+
+        {% if result %}
+        <div class="result-card">
+            <h3 data-translate="disease_result_title">Analysis Results</h3>
+            <div class="result-item">
+                <span class="result-label">Disease:</span>
+                <span class="result-value">{{ result.disease }}</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Plant:</span>
+                <span class="result-value">{{ result.plant }}</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Symptoms:</span>
+                <span class="result-value">
+                    {% for symptom in result.symptoms.split('. ') %}
+                        {% if symptom.strip() %}
+                            {{ symptom.strip() }}.<br>
+                        {% endif %}
+                    {% endfor %}
+                </span>
+            </div>
+            <div class="remedies">
+                <h4>Remedies</h4>
+                <ul>
+                    {% for remedy in result.remedies.split('. ') %}
+                        {% if remedy.strip() %}
+                            <li>{{ remedy.strip() }}</li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+            {% if result.resources %}
+            <div class="resources">
+                <h4 data-translate="resources_title">Resources</h4>
+                <ul>
+                    {% for resource in result.resources %}
+                    <li>
+                        <a href="{{ resource.link }}" target="_blank">{{ resource.title }}</a>: {{ resource.summary }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+        {% elif form_submitted %}
+        <p class="no-result-message" data-translate="no_result">No disease analysis results found. Please try uploading a different image.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+
+    translations.en = {
+    ...translations.en || {},
+    disease_title: "Crop Disease Detection",
+    disease_description: "Upload an image of your crop to identify potential diseases and receive tailored treatment recommendations.",
+    form_image_placeholder: "Choose an image",
+    form_submit: "Analyze Image",
+    disease_result_title: "Analysis Results",
+    resources_title: "Resources",
+    no_result: "No disease analysis results found. Please try uploading a different image."
+};
+
+translations.hi = {
+    ...translations.hi || {},
+    disease_title: "फसल रोग पहचान",
+    disease_description: "अपनी फसल की एक छवि अपलोड करें ताकि संभावित रोगों की पहचान हो सके और अनुकूलित उपचार सिफारिशें प्राप्त हो सकें।",
+    form_image_placeholder: "एक छवि चुनें",
+    form_submit: "छवि का विश्लेषण करें",
+    disease_result_title: "विश्लेषण परिणाम",
+    resources_title: "संसाधन",
+    no_result: "कोई रोग विश्लेषण परिणाम नहीं मिला। कृपया एक अलग छवि अपलोड करने का प्रयास करें।"
+};
+
+translations.kn = {
+    ...translations.kn || {},
+    disease_title: "ಬೆಳೆ ರೋಗ ಪತ್ತೆ",
+    disease_description: "ಸಂಭಾವ್ಯ ರೋಗಗಳನ್ನು ಗುರುತಿಸಲು ಮತ್ತು ಕಸ್ಟಮೈಸ್ಡ್ ಚಿಕಿತ್ಸೆ ಶಿಫಾರಸುಗಳನ್ನು ಪಡೆಯಲು ನಿಮ್ಮ ಬೆಳೆಯ ಚಿತ್ರವನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ.",
+    form_image_placeholder: "ಒಂದು ಚಿತ್ರವನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+    form_submit: "ಚಿತ್ರವನ್ನು ವಿಶ್ಲೇಷಿಸಿ",
+    disease_result_title: "ವಿಶ್ಲೇಷಣೆ ಫಲಿತಾಂಶಗಳು",
+    resources_title: "ಸಂಪನ್ಮೂಲಗಳು",
+    no_result: "ಯಾವುದೇ ರೋಗ ವಿಶ್ಲೇಷಣೆ ಫಲಿತಾಂಶಗಳು ಕಂಡುಬಂದಿಲ್ಲ. ದಯವಿಟ್ಟು ಬೇರೆ ಚಿತ್ರವನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಲು ಪ್ರಯತ್ನಿಸಿ."
+};
+    // Animate elements on scroll
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.animation = 'fadeInUp 1s ease-out forwards';
+            }
+        });
+    }, { threshold: 0.2 });
+
+    document.querySelectorAll('.result-card, .disease-section h2, .disease-section h3, .disease-section p, .form-container').forEach(el => {
+        observer.observe(el);
+    });
+
+    // Loading animation
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('diseaseForm');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
+        // Hide loader when page loads
+        loadingOverlay.style.display = 'none';
+
+        // Show loader on form submission
+        form.addEventListener('submit', () => {
+            loadingOverlay.style.display = 'flex';
+        });
+    });
+</script>
+{% endblock %}
