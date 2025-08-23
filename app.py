@@ -16,6 +16,11 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from typing import List, Dict, Any
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 import logging
+from PIL import Image
+import pypdf
+import docx
+from datetime import datetime
+from datetime import timedelta 
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -30,6 +35,12 @@ mem0_api_key = os.getenv('MEM0_API_KEY')
 
 llm = LLM(
     model="gemini/gemini-2.0-flash",
+    temperature=0.7,
+    api_key=gemini_api_key
+)
+
+langchain_llm = ChatGoogleGenerativeAI(
+    model="gemini-2.0-flash",
     temperature=0.7,
     api_key=gemini_api_key
 )
@@ -51,6 +62,13 @@ class Scheme(BaseModel):
     category: str
     description: str
     link: str
+
+
+class CropPlan(BaseModel):
+    crop_name: str
+    sowing_time: str
+    cultivation_tips: str
+    expected_yield: str
 
 
 
@@ -134,8 +152,32 @@ class CropDiseaseAPI(BaseTool):
             logger.error(f"Error calling Crop Disease API: {str(e)}")
             return f"Error calling Crop Disease API: {e}"
         
+class SoilTypeAPI(BaseTool):
+    name: str = Field(default="SoilTypeAPI", description="Tool to detect soil type based on location.")
+    description: str = Field(default="Identifies soil type by querying an external soil database API based on location.")
+
+    def _run(self, location: str) -> str:
+        try:
+            soil_map = {
+                'assam': 'Alluvial',
+                'punjab': 'Alluvial',
+                'tamil nadu': 'Red',
+                'maharashtra': 'Black',
+                'karnataka': 'Red',
+                'gujarat': 'Sandy'
+            }
+            location = location.lower().strip()
+            for key, value in soil_map.items():
+                if key in location:
+                    return value
+            return 'Unknown'
+        except Exception as e:
+            logger.error(f"Error detecting soil type: {str(e)}")
+            return 'Unknown'
+        
 crop_disease_tool = CropDiseaseAPI()
 scheme_filter_tool = SchemeFilterTool()
+soil_type_tool = SoilTypeAPI()
 
 
 scheme_researcher = Agent(
@@ -152,6 +194,15 @@ symptoms_advisor = Agent(
     role="Crop Symptoms Specialist",
     goal="Identify and describe common symptoms of crop diseases.",
     backstory="An AI agronomist specializing in recognizing and describing symptoms of crop diseases for farmers.",
+    verbose=True,
+    llm=llm
+)
+
+crop_planner = Agent(
+    role="Crop Planning Expert",
+    goal="Generate personalized crop recommendations based on location, season, soil type, and land size.",
+    backstory="An AI agronomist specializing in crop selection and cultivation advice for Indian farmers.",
+    tools=[serper_tool, soil_type_tool],
     verbose=True,
     llm=llm
 )
@@ -175,6 +226,418 @@ resource_link_finder = Agent(
     llm=llm
 )
 
+@app.route('/api/get_soil_type', methods=['POST'])
+def get_soil_type():
+    try:
+        data = request.get_json()
+        if not data or 'location' not in data:
+            return jsonify({"error": "Location is required"}), 400
+
+        location = data['location'].strip()
+        if not location:
+            return jsonify({"error": "Location cannot be empty"}), 400
+
+        soil_type = soil_type_tool._run(location)
+        return jsonify({"soil_type": soil_type}), 200
+    except Exception as e:
+        logger.error(f"Error in get_soil_type: {str(e)}")
+        return jsonify({"error": f"Error detecting soil type: {str(e)}"}), 500
+
+@app.route('/crop_planning', methods=['GET', 'POST'])
+def crop_planning():
+    error_message = None
+    plans = []
+    form_submitted = False
+    output_file = 'crop_plans.json'
+
+    if request.method == 'POST':
+        try:
+            user_data = {
+                'location': request.form.get('location', ''),
+                'season': request.form.get('season', ''),
+                'soil_type': request.form.get('soil_type', ''),
+                'land_size': request.form.get('land_size', '')
+            }
+
+            required_fields = ['location', 'season', 'soil_type', 'land_size']
+            if not all(user_data[field] for field in required_fields):
+                error_message = "All fields are required."
+                return render_template('crop_planning.html', error_message=error_message, plans=plans, form_submitted=True)
+
+            search_task = Task(
+                description=(
+                    f"Search for suitable crops for a farmer in {user_data['location']} during the {user_data['season']} season, "
+                    f"with {user_data['soil_type']} soil and {user_data['land_size']} acres of land. "
+                    f"Use the SerperDevTool to find relevant agricultural data for India. "
+                    f"Return a JSON list of 3-5 crop recommendations with crop_name, sowing_time, cultivation_tips, and expected_yield, "
+                    f"ensuring the output is a valid JSON string without markdown code fences, "
+                    f"compatible with the following schema: "
+                    f"{json.dumps([{'crop_name': 'string', 'sowing_time': 'string', 'cultivation_tips': 'string', 'expected_yield': 'string'}])}"
+                ),
+                expected_output="A JSON list of 3-5 crop recommendations with crop_name, sowing_time, cultivation_tips, and expected_yield.",
+                agent=crop_planner,
+                output_file=output_file
+            )
+
+            crew = Crew(
+                agents=[crop_planner],
+                tasks=[search_task],
+                verbose=True
+            )
+
+            @retry(
+                stop=stop_after_attempt(3),
+                wait=wait_exponential(multiplier=1, min=4, max=10),
+                retry=retry_if_exception_type(Exception),
+                after=lambda retry_state: logger.debug(f"Retry attempt {retry_state.attempt_number} failed with {retry_state.outcome.exception()}")
+            )
+            def execute_crew():
+                return crew.kickoff()
+
+            try:
+                result = execute_crew()
+            except Exception as e:
+                logger.error(f"Crew execution failed after retries: {str(e)}")
+                error_message = "The crop planning service is temporarily unavailable. Please try again later."
+                return render_template('crop_planning.html', error_message=error_message, plans=plans, form_submitted=True)
+
+            try:
+                if os.path.exists(output_file):
+                    with open(output_file, 'r', encoding='utf-8') as f:
+                        content = f.read().strip()
+
+                    raw_output_file = 'crop_plans_raw.txt'
+                    with open(raw_output_file, 'w', encoding='utf-8') as f:
+                        f.write(content)
+                    logger.debug(f"Raw output saved to {raw_output_file}: {content}")
+
+                    clean_content = content
+                    if content.startswith('```json') and content.endswith('```'):
+                        clean_content = '\n'.join(content.splitlines()[1:-1]).strip()
+                    elif content.startswith('```') and content.endswith('```'):
+                        clean_content = '\n'.join(content.splitlines()[1:-1]).strip()
+
+                    if not clean_content:
+                        error_message = "Output file is empty after cleaning."
+                        logger.error(error_message)
+                        return render_template('crop_planning.html', error_message=error_message, plans=plans, form_submitted=True)
+
+                    try:
+                        plans_data = json.loads(clean_content)
+                    except json.JSONDecodeError as e:
+                        logger.error(f"Error parsing JSON from {output_file}: {e}")
+                        error_message = f"Error processing crop plans: {e}"
+                        return render_template('crop_planning.html', error_message=error_message, plans=plans, form_submitted=True)
+
+                    if not isinstance(plans_data, list):
+                        error_message = "Crop plans data is not a valid JSON list."
+                        logger.error(error_message)
+                        return render_template('crop_planning.html', error_message=error_message, plans=plans, form_submitted=True)
+
+                    with open(output_file, 'w', encoding='utf-8') as f:
+                        json.dump(plans_data, f, indent=2)
+                    logger.debug(f"Saved cleaned JSON to {output_file}")
+
+                    plans = [CropPlan(**plan) for plan in plans_data if isinstance(plan, dict)]
+                    if not plans:
+                        error_message = "No valid crop plans found matching your criteria."
+                        logger.warning(error_message)
+                else:
+                    error_message = f"Output file {output_file} not found."
+                    logger.error(error_message)
+            except Exception as e:
+                logger.error(f"Error processing {output_file}: {e}")
+                error_message = f"Error processing crop plans: {e}"
+
+            form_submitted = True
+        except Exception as e:
+            logger.error(f"Error fetching crop plans: {e}")
+            error_message = "An unexpected error occurred during crop planning. Please try again later."
+
+    return render_template('crop_planning.html', plans=plans, error_message=error_message, form_submitted=form_submitted)
+
+@app.route('/document_analyzer')
+def document_analyzer():
+    lang = request.args.get('lang', 'en')
+    return render_template('document_analyzer.html', lang=lang)
+
+@app.route('/analyze_document', methods=['POST'])
+def analyze_document():
+    try:
+        if 'file' not in request.files:
+            return jsonify({"error": "No file provided"}), 400
+
+        file = request.files['file']
+        document_type = request.form.get('document_type', 'other')
+        language = request.form.get('language', 'en')
+
+        if not file.filename:
+            return jsonify({"error": "No file selected"}), 400
+
+        allowed_extensions = {'pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx'}
+        if file.filename.rsplit('.', 1)[-1].lower() not in allowed_extensions:
+            return jsonify({"error": "Unsupported file type. Use PDF, JPG, PNG, DOC, or DOCX."}), 400
+
+        content = ""
+        if file.filename.endswith('.pdf'):
+            pdf_reader = pypdf.PdfReader(file)
+            for page in pdf_reader.pages:
+                content += page.extract_text() or ""
+        elif file.filename.endswith(('.jpg', '.jpeg', '.png')):
+            image = Image.open(file)
+            content = f"Sample {document_type} document content extracted from image."
+        elif file.filename.endswith(('.doc', '.docx')):
+            doc = docx.Document(file)
+            content = "\n".join([para.text for para in doc.paragraphs])
+
+        if not content.strip():
+            content = f"Placeholder content for {document_type} document."
+
+        prompt_template = PromptTemplate(
+            input_variables=["content", "document_type", "language"],
+            template=""" 
+            You are a financial document analysis assistant for India. Analyze the provided document content and provide guidance for filling it out correctly. The document type is '{document_type}' and the output must be in '{language}'.
+
+            Document Content:
+            {content}
+
+            Instructions:
+            - Analyze the document content and identify its purpose and requirements.
+            - Provide the following in '{language}':
+              - Summary: A brief description of the document's purpose (1-2 sentences).
+              - Required Information: A list of 3-5 key fields or details needed to complete the document.
+              - Filing Instructions: A list of 3-5 steps to correctly fill out or submit the document.
+              - Important Notes: Any additional guidance or requirements (e.g., supporting documents, mandatory fields).
+            - Return a JSON object with translations for English, Hindi, and Kannada, even if the requested language is only one of them.
+            - Ensure the JSON is valid and properly formatted.
+            - Do not include markdown or extra text, only the JSON object.
+
+            Example Output:
+            {{
+                "en": {{
+                    "summary": "This is a loan application form requiring personal and financial details.",
+                    "required_info": ["Name and address", "Monthly income", "Loan amount", "Purpose of loan", "Repayment period"],
+                    "instructions": ["Fill in personal details in BLOCK LETTERS", "Provide accurate income", "State loan purpose clearly", "Include bank details", "Sign the form"],
+                    "notes": "Attach Aadhaar/PAN, address proof, and income proof. All fields marked with * are mandatory."
+                }},
+                "hi": {{
+                    "summary": "यह एक ऋण आवेदन पत्र है जिसमें व्यक्तिगत और वित्तीय विवरण की आवश्यकता है।",
+                    "required_info": ["नाम और पता", "मासिक आय", "ऋण राशि", "ऋण का उद्देश्य", "पुनर्भुगतान अवधि"],
+                    "instructions": ["व्यक्तिगत विवरण बड़े अक्षरों में भरें", "सटीक आय प्रदान करें", "ऋण का उद्देश्य स्पष्ट करें", "बैंक विवरण शामिल करें", "फॉर्म पर हस्ताक्षर करें"],
+                    "notes": "आधार/पैन, पते का प्रमाण और आय प्रमाण संलग्न करें। * के साथ चिह्नित सभी फ़ील्ड अनिवार्य हैं।"
+                }},
+                "kn": {{
+                    "summary": "ಇದು ವೈಯಕ್ತಿಕ ಮತ್ತು ಆರ್ಥಿಕ ವಿವರಗಳನ್ನು ಕೋರುವ ಸಾಲದ ಅರ್ಜಿ ನಮೂನೆಯಾಗಿದೆ.",
+                    "required_info": ["ಹೆಸರು ಮತ್ತು ವಿಳಾಸ", "ಮಾಸಿಕ ಆದಾಯ", "ಸಾಲದ ಮೊತ್ತ", "ಸಾಲದ ಉದ್ದೇಶ", "ಮರುಪಾವತಿ ಅವಧಿ"],
+                    "instructions": ["ವೈಯಕ್ತಿಕ ವಿವರಗಳನ್ನು ದೊಡ್ಡ ಅಕ್ಷರಗಳಲ್ಲಿ ಭರ್ತಿ ಮಾಡಿ", "ನಿಖರವಾದ ಆದಾಯವನ್ನು ಒದಗಿಸಿ", "ಸಾಲದ ಉದ್ದೇಶವನ್ನು ಸ್ಪಷ್ಟವಾಗಿ ತಿಳಿಸಿ", "ಬ್ಯಾಂಕ್ ವಿವರಗಳನ್ನು ಸೇರಿಸಿ", "ಫಾರ್ಮ್‌ಗೆ ಸಹಿ ಮಾಡಿ"],
+                    "notes": "ಆಧಾರ್/ಪ್ಯಾನ್, ವಿಳಾಸದ ಪುರಾವೆ ಮತ್ತು ಆದಾಯದ ಪುರಾವೆಯನ್ನು ಲಗತ್ತಿಸಿ. * ಗುರುತಿನ ಎಲ್ಲಾ ಕ್ಷೇತ್ರಗಳು ಕಡ್ಡಾಯವಾಗಿವೆ."
+                }}
+            }}
+            """
+        )
+
+        prompt = prompt_template.format(
+            content=content[:1000],
+            document_type=document_type,
+            language={'en': 'English', 'hi': 'Hindi', 'kn': 'Kannada'}[language]
+        )
+
+        try:
+            logger.debug(f"Sending prompt to Gemini: {prompt[:200]}...")
+            response = langchain_llm.invoke(prompt)
+            logger.debug(f"Raw Gemini response: {response.content}")
+
+            response_content = response.content.strip()
+            response_content = re.sub(r'^```json\s*|\s*```$', '', response_content).strip()
+            logger.debug(f"Cleaned Gemini response: {response_content}")
+
+            analysis = json.loads(response_content)
+            if not isinstance(analysis, dict) or not all(lang in analysis for lang in ['en', 'hi', 'kn']):
+                logger.error("Invalid analysis response format")
+                return jsonify({"error": "Invalid analysis response"}), 500
+
+        except (json.JSONDecodeError, ValueError) as e:
+            logger.error(f"Error parsing Gemini response: {str(e)}")
+            return jsonify({"error": "Failed to parse analysis response"}), 500
+        except Exception as e:
+            logger.error(f"Gemini query error: {str(e)}")
+            return jsonify({"error": f"Analysis error: {str(e)}"}), 500
+
+        return jsonify({"analysis": analysis}), 200
+
+    except Exception as e:
+        logger.error(f"Server error: {str(e)}")
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
+
+
+@app.route('/weather_advisory')
+def weather_advisory():
+    lang = request.args.get('lang', 'en')
+    return render_template('weather_advisory.html', lang=lang)
+
+@app.route('/weather_advisory_data', methods=['POST'])
+def weather_advisory_data():
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+
+        required_fields = ['location', 'district', 'state']
+        for field in required_fields:
+            if field not in data or not data[field]:
+                return jsonify({"error": f"Missing or empty field: {field}"}), 400
+
+        location = data['location'].strip().title()
+        district = data['district'].strip().title()
+        state = data['state'].strip().title()
+
+        today = datetime.now()
+        daily_dates = [(today + timedelta(days=i)).strftime('%Y-%m-%d') for i in range(1, 3)] 
+        weekly_dates = [(today + timedelta(days=i)).strftime('%Y-%m-%d') for i in range(1, 8)] 
+
+        prompt_template = PromptTemplate(
+            input_variables=["location", "district", "state", "daily_dates", "weekly_dates"],
+            template=""" 
+            You are a weather and agricultural advisory assistant for rural India. Based on the provided location details, generate weather forecasts and agricultural tips for farmers. The current date is {today}.
+
+            Location Details:
+            - Village/Town: {location}
+            - District: {district}
+            - State: {state}
+
+            Instructions:
+            - Provide a weather forecast for the specified location, including:
+              - Daily forecast for the next 2 days ({daily_dates}).
+              - Weekly forecast for the next 7 days ({weekly_dates}).
+              - Agricultural tips based on the weather conditions.
+              - Weather alerts for any extreme conditions (e.g., heavy rain, drought).
+            - Each daily forecast entry must include:
+              - date: The date in YYYY-MM-DD format.
+              - condition: Weather condition (e.g., Sunny, Rainy, Cloudy).
+              - temperature: Temperature in Celsius (e.g., 28).
+              - humidity: Humidity percentage (e.g., 70).
+              - icon: A Font Awesome icon name (e.g., sun, cloud-rain, cloud) for the condition.
+            - Each weekly forecast entry must include:
+              - date: The date in YYYY-MM-DD format.
+              - condition: Weather condition.
+              - min_temp: Minimum temperature in Celsius.
+              - max_temp: Maximum temperature in Celsius.
+              - icon: A Font Awesome icon name for the condition.
+            - Agricultural tips:
+              - Provide 3-5 practical tips for farmers based on the weather forecast (e.g., irrigation advice, crop protection).
+              - Return as a list of strings.
+            - Weather alerts:
+              - If there are extreme weather conditions (e.g., heavy rain, heatwave), provide a brief alert message.
+              - If no alerts, return a message indicating no extreme weather.
+            - Return a JSON object with:
+              - daily_forecast: Array of daily forecast objects.
+              - weekly_forecast: Array of weekly forecast objects.
+              - agricultural_tips: Array of tip strings.
+              - weather_alerts: A string with the alert message or a message indicating no alerts.
+            - Ensure the JSON is valid and properly formatted.
+            - Do not include any additional text, markdown, or explanations—only the JSON object.
+
+            Example Output:
+            {{
+                "daily_forecast": [
+                    {{
+                        "date": "2025-05-12",
+                        "condition": "Sunny",
+                        "temperature": 30,
+                        "humidity": 65,
+                        "icon": "sun"
+                    }},
+                    {{
+                        "date": "2025-05-13",
+                        "condition": "Rainy",
+                        "temperature": 26,
+                        "humidity": 80,
+                        "icon": "cloud-rain"
+                    }}
+                ],
+                "weekly_forecast": [
+                    {{
+                        "date": "2025-05-12",
+                        "condition": "Sunny",
+                        "min_temp": 22,
+                        "max_temp": 30,
+                        "icon": "sun"
+                    }},
+                    {{
+                        "date": "2025-05-13",
+                        "condition": "Rainy",
+                        "min_temp": 20,
+                        "max_temp": 26,
+                        "icon": "cloud-rain"
+                    }}
+                ],
+                "agricultural_tips": [
+                    "Ensure proper irrigation as the weather will be sunny.",
+                    "Prepare for rain by protecting crops with covers."
+                ],
+                "weather_alerts": "No extreme weather alerts at this time."
+            }}
+            """
+        )
+
+        prompt = prompt_template.format(
+            location=location,
+            district=district,
+            state=state,
+            daily_dates=", ".join(daily_dates),
+            weekly_dates=", ".join(weekly_dates),
+            today=today.strftime('%Y-%m-%d')
+        )
+
+        try:
+            logger.debug(f"Sending prompt to Gemini for weather: {prompt[:200]}...")
+            response = langchain_llm.invoke(prompt)
+            logger.debug(f"Raw Gemini response: {response.content}")
+
+            response_content = response.content.strip()
+            response_content = re.sub(r'^```json\s*|\s*```$', '', response_content).strip()
+            logger.debug(f"Cleaned Gemini response: {response_content}")
+
+            weather_data = json.loads(response_content)
+            if not isinstance(weather_data, dict) or 'daily_forecast' not in weather_data or 'weekly_forecast' not in weather_data:
+                logger.error("Invalid response format from Gemini")
+                return jsonify({"error": "Invalid weather data format"}), 500
+
+            required_daily_fields = ['date', 'condition', 'temperature', 'humidity', 'icon']
+            valid_daily = []
+            for day in weather_data['daily_forecast']:
+                if isinstance(day, dict) and all(field in day for field in required_daily_fields):
+                    valid_daily.append(day)
+                else:
+                    logger.warning(f"Invalid daily forecast object: {day}")
+            weather_data['daily_forecast'] = valid_daily
+
+            required_weekly_fields = ['date', 'condition', 'min_temp', 'max_temp', 'icon']
+            valid_weekly = []
+            for day in weather_data['weekly_forecast']:
+                if isinstance(day, dict) and all(field in day for field in required_weekly_fields):
+                    valid_weekly.append(day)
+                else:
+                    logger.warning(f"Invalid weekly forecast object: {day}")
+            weather_data['weekly_forecast'] = valid_weekly
+
+            if 'agricultural_tips' not in weather_data or not isinstance(weather_data['agricultural_tips'], list):
+                weather_data['agricultural_tips'] = ["No agricultural tips available."]
+            if 'weather_alerts' not in weather_data or not isinstance(weather_data['weather_alerts'], str):
+                weather_data['weather_alerts'] = "No weather alerts available."
+
+        except (json.JSONDecodeError, ValueError) as e:
+            logger.error(f"Error parsing Gemini response: {str(e)}")
+            return jsonify({"error": "Failed to parse weather data"}), 500
+        except Exception as e:
+            logger.error(f"Gemini query error: {str(e)}")
+            return jsonify({"error": f"Server error: {str(e)}"}), 500
+
+        return jsonify(weather_data), 200
+
+    except Exception as e:
+        logger.error(f"Server error: {str(e)}")
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 @app.route('/disease', methods=['GET', 'POST'])
 def disease():

@@ -1,0 +1,675 @@
+{% extends "base.html" %}
+
+{% block title %}
+Krishi.ai - Document Analyzer
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 4rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .hero-title {
+        font-weight: 700;
+    }
+    
+    .hero-subtitle {
+        font-weight: 300;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .analyzer-card {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        transition: transform 0.3s ease;
+    }
+    
+    .analyzer-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .file-upload-area {
+        border: 2px dashed var(--primary-color);
+        border-radius: 8px;
+        padding: 3rem 1rem;
+        text-align: center;
+        margin-bottom: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .file-upload-area:hover {
+        background-color: rgba(30, 95, 116, 0.05);
+    }
+    
+    .file-upload-area.active {
+        border-color: var(--secondary-color);
+        background-color: rgba(77, 157, 124, 0.05);
+    }
+    
+    .file-input {
+        display: none;
+    }
+    
+    .status-card {
+        display: none;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .document-preview {
+        display: none;
+        max-height: 400px;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .document-analysis {
+        display: none;
+    }
+    
+    .loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100px;
+    }
+    
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid var(--primary-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .result-card {
+        border-left: 4px solid var(--secondary-color);
+        padding-left: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-label {
+        font-weight: 600;
+    }
+    
+    .steps-container {
+        margin-top: 2rem;
+        counter-reset: step-counter;
+    }
+    
+    .step {
+        position: relative;
+        padding-left: 60px;
+        margin-bottom: 2rem;
+    }
+    
+    .step:before {
+        content: counter(step-counter);
+        counter-increment: step-counter;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 45px;
+        height: 45px;
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: 700;
+        font-size: 1.25rem;
+    }
+    
+    .step-content {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        padding: 1.5rem;
+    }
+    
+    .supported-documents-list {
+        list-style-type: none;
+        padding-left: 0;
+    }
+    
+    .supported-documents-list li {
+        margin-bottom: 0.5rem;
+        padding-left: 2rem;
+        position: relative;
+    }
+    
+    .supported-documents-list li:before {
+        content: "\f15c";
+        font-family: "Font Awesome 5 Free";
+        position: absolute;
+        left: 0;
+        color: var(--primary-color);
+        font-weight: 400;
+    }
+    
+    .language-toggles {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 2rem;
+    }
+    
+    .language-btn {
+        margin: 0 0.5rem;
+        border-radius: 20px;
+        padding: 0.5rem 1.25rem;
+        transition: all 0.3s ease;
+    }
+    
+    .document-type-selector {
+        margin-bottom: 1.5rem;
+    }
+    
+    .language-container {
+        display: none;
+    }
+    
+    .language-container.active {
+        display: block;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section text-center">
+    <div class="container">
+        <h1 class="hero-title mb-3" data-translate="doc_analyzer_title">Document Analyzer</h1>
+        <p class="hero-subtitle mb-4" data-translate="doc_analyzer_subtitle">Upload your financial documents, and we'll analyze them to provide guidance and explanations in your preferred language.</p>
+    </div>
+</section>
+
+<!-- Main Content -->
+<div class="container my-5">
+    <!-- Language Toggle Buttons -->
+    <div class="language-toggles">
+        <button class="btn language-btn btn-primary active" data-language="en" data-translate="lang_english">English</button>
+        <button class="btn language-btn btn-outline-primary" data-language="hi" data-translate="lang_hindi">हिंदी</button>
+        <button class="btn language-btn btn-outline-primary" data-language="kn" data-translate="lang_kannada">ಕನ್ನಡ</button>
+    </div>
+    
+    <!-- Document Analyzer Section -->
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="analyzer-card">
+                <h3 class="text-center mb-4" data-translate="upload_document">Upload Your Document</h3>
+                
+                <!-- Document Type Selector -->
+                <div class="document-type-selector">
+                    <label class="form-label" data-translate="document_type">Document Type:</label>
+                    <select class="form-select" id="documentType">
+                        <option value="loan" data-translate="doc_type_loan">Loan Application</option>
+                        <option value="kyc" data-translate="doc_type_kyc">KYC Document</option>
+                        <option value="bank" data-translate="doc_type_bank">Bank Statement</option>
+                        <option value="scheme" data-translate="doc_type_scheme">Government Scheme Form</option>
+                        <option value="other" data-translate="doc_type_other">Other Financial Document</option>
+                    </select>
+                </div>
+                
+                <!-- File Upload Area -->
+                <div class="file-upload-area" id="fileUploadArea">
+                    <i class="fas fa-file-upload fa-3x mb-3 text-muted"></i>
+                    <h5 data-translate="drop_files">Drop your files here</h5>
+                    <p class="text-muted" data-translate="or_click">or click to browse</p>
+                    <input type="file" id="fileInput" class="file-input" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                </div>
+                
+                <!-- Processing Status -->
+                <div class="status-card" id="statusCard">
+                    <div class="d-flex align-items-center">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                        </div>
+                        <div class="ms-3">
+                            <h5 data-translate="processing_document">Processing your document...</h5>
+                            <p class="text-muted mb-0" data-translate="please_wait">Please wait while we analyze your document. This may take a few moments.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Document Analysis Results -->
+                <div class="document-analysis" id="documentAnalysis">
+                    <!-- English Results -->
+                    <div class="language-container active" id="analysisEn">
+                        <h4 class="mb-4" data-translate="analysis_results">Document Analysis Results</h4>
+                        <div class="result-card">
+                            <h5 data-translate="doc_summary">Document Summary</h5>
+                            <p id="docSummaryEn"></p>
+                        </div>
+                        <div class="result-card">
+                            <h5 data-translate="required_info">Required Information</h5>
+                            <ul id="requiredInfoEn"></ul>
+                        </div>
+                        <div class="result-card">
+                            <h5 data-translate="filing_instructions">Filing Instructions</h5>
+                            <ol id="filingInstructionsEn"></ol>
+                        </div>
+                        <div class="result-card">
+                            <h5 data-translate="important_notes">Important Notes</h5>
+                            <p id="importantNotesEn"></p>
+                        </div>
+                    </div>
+                    
+                    <!-- Hindi Results -->
+                    <div class="language-container" id="analysisHi">
+                        <h4 class="mb-4" data-translate="analysis_results">दस्तावेज़ विश्लेषण परिणाम</h4>
+                        <div class="result-card">
+                            <h5 data-translate="doc_summary">दस्तावेज़ सारांश</h5>
+                            <p id="docSummaryHi"></p>
+                        </div>
+                        <div class="result-card">
+                            <h5 data-translate="required_info">आवश्यक जानकारी</h5>
+                            <ul id="requiredInfoHi"></ul>
+                        </div>
+                        <div class="result-card">
+                            <h5 data-translate="filing_instructions">भरने के निर्देश</h5>
+                            <ol id="filingInstructionsHi"></ol>
+                        </div>
+                        <div class="result-card">
+                            <h5 data-translate="important_notes">महत्वपूर्ण नोट्स</h5>
+                            <p id="importantNotesHi"></p>
+                        </div>
+                    </div>
+                    
+                    <!-- Kannada Results -->
+                    <div class="language-container" id="analysisKn">
+                        <h4 class="mb-4" data-translate="analysis_results">ದಾಖಲೆ ವಿಶ್ಲೇಷಣೆ ಫಲಿತಾಂಶಗಳು</h4>
+                        <div class="result-card">
+                            <h5 data-translate="doc_summary">ದಾಖಲೆ ಸಾರಾಂಶ</h5>
+                            <p id="docSummaryKn"></p>
+                        </div>
+                        <div class="result-card">
+                            <h5 data-translate="required_info">ಅಗತ್ಯವಿರುವ ಮಾಹಿತಿ</h5>
+                            <ul id="requiredInfoKn"></ul>
+                        </div>
+                        <div class="result-card">
+                            <h5 data-translate="filing_instructions">ಭರ್ತಿ ಮಾಡುವ ಸೂಚನೆಗಳು</h5>
+                            <ol id="filingInstructionsKn"></ol>
+                        </div>
+                        <div class="result-card">
+                            <h5 data-translate="important_notes">ಮಹತ್ವದ ಟಿಪ್ಪಣಿಗಳು</h5>
+                            <p id="importantNotesKn"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- How It Works Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h2 class="text-center mb-4" data-translate="how_it_works">How It Works</h2>
+            <div class="steps-container">
+                <div class="step">
+                    <div class="step-content">
+                        <h4 data-translate="step1_title">Upload Your Document</h4>
+                        <p data-translate="step1_desc">Select the document type and upload your financial document by clicking on the upload area or dropping the file.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-content">
+                        <h4 data-translate="step2_title">AI-Powered Analysis</h4>
+                        <p data-translate="step2_desc">Our advanced AI system analyzes your document, identifies the type, and extracts important information and requirements.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-content">
+                        <h4 data-translate="step3_title">Get Simple Guidance</h4>
+                        <p data-translate="step3_desc">Receive easy-to-understand instructions and guidance on how to complete the document correctly in your preferred language.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-content">
+                        <h4 data-translate="step4_title">Download Instructions</h4>
+                        <p data-translate="step4_desc">Download the complete guidance as a PDF for future reference or sharing with others who may help you.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Supported Documents Section -->
+    <div class="row mt-5 mb-5">
+        <div class="col-md-8 mx-auto text-center">
+            <h3 class="mb-4" data-translate="supported_documents">Supported Documents</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <ul class="supported-documents-list text-start">
+                        <li data-translate="doc_loan_applications">Loan Applications</li>
+                        <li data-translate="doc_kyc_forms">KYC Forms</li>
+                        <li data-translate="doc_bank_statements">Bank Statements</li>
+                        <li data-translate="doc_income_tax">Income Tax Returns</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <ul class="supported-documents-list text-start">
+                        <li data-translate="doc_govt_schemes">Government Scheme Forms</li>
+                        <li data-translate="doc_farm_credit">Farm Credit Documents</li>
+                        <li data-translate="doc_insurance">Insurance Forms</li>
+                        <li data-translate="doc_subsidy">Subsidy Applications</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="alert alert-info mt-4">
+                <i class="fas fa-info-circle me-2"></i>
+                <span data-translate="upload_note">We support PDF, JPG, PNG, and DOC file formats. Maximum file size: 10MB.</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Initialize translations if not already defined
+    window.translations = window.translations || {};
+    const localTranslations = {
+        en: {
+            doc_analyzer_title: "Document Analyzer",
+            doc_analyzer_subtitle: "Upload your financial documents, and we'll analyze them to provide guidance and explanations in your preferred language.",
+            lang_english: "English",
+            lang_hindi: "हिंदी",
+            lang_kannada: "ಕನ್ನಡ",
+            upload_document: "Upload Your Document",
+            document_type: "Document Type",
+            doc_type_loan: "Loan Application",
+            doc_type_kyc: "KYC Document",
+            doc_type_bank: "Bank Statement",
+            doc_type_scheme: "Government Scheme Form",
+            doc_type_other: "Other Financial Document",
+            drop_files: "Drop your files here",
+            or_click: "or click to browse",
+            processing_document: "Processing your document...",
+            please_wait: "Please wait while we analyze your document. This may take a few moments.",
+            document_preview: "Document Preview",
+            analysis_results: "Document Analysis Results",
+            doc_summary: "Document Summary",
+            required_info: "Required Information",
+            filing_instructions: "Filing Instructions",
+            important_notes: "Important Notes",
+            download_guide: "Download Guidance PDF",
+            how_it_works: "How It Works",
+            step1_title: "Upload Your Document",
+            step1_desc: "Select the document type and upload your financial document by clicking on the upload area or dropping the file.",
+            step2_title: "AI-Powered Analysis",
+            step2_desc: "Our advanced AI system analyzes your document, identifies the type, and extracts important information and requirements.",
+            step3_title: "Get Simple Guidance",
+            step3_desc: "Receive easy-to-understand instructions and guidance on how to complete the document correctly in your preferred language.",
+            step4_title: "Download Instructions",
+            step4_desc: "Download the complete guidance as a PDF for future reference or sharing with others who may help you.",
+            supported_documents: "Supported Documents",
+            doc_loan_applications: "Loan Applications",
+            doc_kyc_forms: "KYC Forms",
+            doc_bank_statements: "Bank Statements",
+            doc_income_tax: "Income Tax Returns",
+            doc_govt_schemes: "Government Scheme Forms",
+            doc_farm_credit: "Farm Credit Documents",
+            doc_insurance: "Insurance Forms",
+            doc_subsidy: "Subsidy Applications",
+            upload_note: "We support PDF, JPG, PNG, and DOC file formats. Maximum file size: 10MB."
+        },
+        hi: {
+            doc_analyzer_title: "दस्तावेज़ विश्लेषक",
+            doc_analyzer_subtitle: "अपने वित्तीय दस्तावेज़ अपलोड करें, और हम आपकी पसंदीदा भाषा में मार्गदर्शन और स्पष्टीकरण प्रदान करने के लिए उनका विश्लेषण करेंगे।",
+            lang_english: "English",
+            lang_hindi: "हिंदी",
+            lang_kannada: "ಕನ್ನಡ",
+            upload_document: "अपना दस्तावेज़ अपलोड करें",
+            document_type: "दस्तावेज़ का प्रकार",
+            doc_type_loan: "ऋण आवेदन",
+            doc_type_kyc: "केवाईसी दस्तावेज़",
+            doc_type_bank: "बैंक स्टेटमेंट",
+            doc_type_scheme: "सरकारी योजना फॉर्म",
+            doc_type_other: "अन्य वित्तीय दस्तावेज़",
+            drop_files: "अपनी फाइलें यहां खींचें और छोड़ें",
+            or_click: "या ब्राउज़ करने के लिए क्लिक करें",
+            processing_document: "आपका दस्तावेज़ प्रोसेस हो रहा है...",
+            please_wait: "कृपया प्रतीक्षा करें जबकि हम आपके दस्तावेज़ का विश्लेषण करते हैं। इसमें कुछ क्षण लग सकते हैं।",
+            document_preview: "दस्तावेज़ प्रीव्यू",
+            analysis_results: "दस्तावेज़ विश्लेषण परिणाम",
+            doc_summary: "दस्तावेज़ सारांश",
+            required_info: "आवश्यक जानकारी",
+            filing_instructions: "भरने के निर्देश",
+            important_notes: "महत्वपूर्ण नोट्स",
+            download_guide: "मार्गदर्शन PDF डाउनलोड करें",
+            how_it_works: "यह कैसे काम करता है",
+            step1_title: "अपना दस्तावेज़ अपलोड करें",
+            step1_desc: "दस्तावेज़ का प्रकार चुनें और अपलोड क्षेत्र पर क्लिक करके या फ़ाइल ड्रॉप करके अपना वित्तीय दस्तावेज़ अपलोड करें।",
+            step2_title: "AI-संचालित विश्लेषण",
+            step2_desc: "हमारी उन्नत AI प्रणाली आपके दस्तावेज़ का विश्लेषण करती है, प्रकार की पहचान करती है, और महत्वपूर्ण जानकारी और आवश्यकताओं को निकालती है।",
+            step3_title: "सरल मार्गदर्शन प्राप्त करें",
+            step3_desc: "अपनी पसंदीदा भाषा में दस्तावेज़ को सही ढंग से पूरा करने के लिए आसानी से समझने योग्य निर्देश और मार्गदर्शन प्राप्त करें।",
+            step4_title: "निर्देश डाउनलोड करें",
+            step4_desc: "भविष्य के संदर्भ के लिए या उन अन्य लोगों के साथ साझा करने के लिए पूर्ण मार्गदर्शन को PDF के रूप में डाउनलोड करें जो आपकी मदद कर सकते हैं।",
+            supported_documents: "समर्थित दस्तावेज़",
+            doc_loan_applications: "ऋण आवेदन",
+            doc_kyc_forms: "केवाईसी फॉर्म",
+            doc_bank_statements: "बैंक स्टेटमेंट",
+            doc_income_tax: "आयकर रिटर्न",
+            doc_govt_schemes: "सरकारी योजना फॉर्म",
+            doc_farm_credit: "कृषि ऋण दस्तावेज़",
+            doc_insurance: "बीमा फॉर्म",
+            doc_subsidy: "सब्सिडी आवेदन"
+        },
+        kn: {
+            doc_analyzer_title: "ದಾಖಲೆ ವಿಶ್ಲೇಷಕ",
+            doc_analyzer_subtitle: "ನಿಮ್ಮ ಆರ್ಥಿಕ ದಾಖಲೆಗಳನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ, ನಾವು ಅವುಗಳನ್ನು ವಿಶ್ಲೇಷಿಸಿ ನಿಮ್ಮ ಆಯ್ಕೆಯ ಭಾಷೆಯಲ್ಲಿ ಮಾರ್ಗದರ್ಶನ ಮತ್ತು ವಿವರಣೆಗಳನ್ನು ಒದಗಿಸುತ್ತೇವೆ.",
+            lang_english: "English",
+            lang_hindi: "हिंदी",
+            lang_kannada: "ಕನ್ನಡ",
+            upload_document: "ನಿಮ್ಮ ದಾಖಲೆಯನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ",
+            document_type: "ದಾಖಲೆಯ ಪ್ರಕಾರ",
+            doc_type_loan: "ಸಾಲದ ಅರ್ಜಿ",
+            doc_type_kyc: "ಕೆವೈಸಿ ದಾಖಲೆ",
+            doc_type_bank: "ಬ್ಯಾಂಕ್ ಸ್ಟೇಟ್‌ಮೆಂಟ್",
+            doc_type_scheme: "ಸರ್ಕಾರಿ ಯೋಜನೆ ಫಾರ್ಮ್",
+            doc_type_other: "ಇತರ ಆರ್ಥಿಕ ದಾಖಲೆ",
+            drop_files: "ನಿಮ್ಮ ಫೈಲ್‌ಗಳನ್ನು ಇಲ್ಲಿ ಬಿಡಿ",
+            or_click: "ಅಥವಾ ಬ್ರೌಸ್ ಮಾಡಲು ಕ್ಲಿಕ್ ಮಾಡಿ",
+            processing_document: "ನಿಮ್ಮ ದಾಖಲೆಯನ್ನು ಸಂಸ್ಕರಿಸಲಾಗುತ್ತಿದೆ...",
+            please_wait: "ನಾವು ನಿಮ್ಮ ದಾಖಲೆಯನ್ನು ವಿಶ್ಲೇಷಿಸುವವರೆಗೆ ದಯವಿಟ್ಟು ಕಾಯಿರಿ. ಇದಕ್ಕೆ ಕೆಲವು ಕ್ಷಣಗಳು ತಗಲಬಹುದು.",
+            document_preview: "ದಾಖಲೆ ಪೂರ್ವವೀಕ್ಷಣೆ",
+            analysis_results: "ದಾಖಲೆ ವಿಶ್ಲೇಷಣೆ ಫಲಿತಾಂಶಗಳು",
+            doc_summary: "ದಾಖಲೆ ಸಾರಾಂಶ",
+            required_info: "ಅಗತ್ಯವಿರುವ ಮಾಹಿತಿ",
+            filing_instructions: "ಭರ್ತಿ ಮಾಡುವ ಸೂಚನೆಗಳು",
+            important_notes: "ಮಹತ್ವದ ಟಿಪ್ಪಣಿಗಳು",
+            download_guide: "ಮಾರ್ಗದರ್ಶನ PDF ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ",
+            how_it_works: "ಇದು ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ",
+            step1_title: "ನಿಮ್ಮ ದಾಖಲೆಯನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ",
+            step1_desc: "ದಾಖಲೆಯ ಪ್ರಕಾರವನ್ನು ಆಯ್ಕೆಮಾಡಿ ಮತ್ತು ಅಪ್‌ಲೋಡ್ ಏರಿಯಾದಲ್ಲಿ ಕ್ಲಿಕ್ ಮಾಡುವ ಮೂಲಕ ಅಥವಾ ಫೈಲ್ ಡ್ರಾಪ್ ಮಾಡುವ ಮೂಲಕ ನಿಮ್ಮ ಆರ್ಥಿಕ ದಾಖಲೆಯನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ.",
+            step2_title: "AI-ಚಾಲಿತ ವಿಶ್ಲೇಷಣೆ",
+            step2_desc: "ನಮ್ಮ ಸುಧಾರಿತ AI ವ್ಯವಸ್ಥೆಯು ನಿಮ್ಮ ದಾಖಲೆಯನ್ನು ವಿಶ್ಲೇಷಿಸುತ್ತದೆ, ಪ್ರಕಾರವನ್ನು ಗುರುತಿಸುತ್ತದೆ ಮತ್ತು ಪ್ರಮುಖ ಮಾಹಿತಿ ಮತ್ತು ಅವಶ್ಯಕತೆಗಳನ್ನು ಹೊರತೆಗೆಯುತ್ತದೆ.",
+            step3_title: "ಸರಳ ಮಾರ್ಗದರ್ಶನ ಪಡೆಯಿರಿ",
+            step3_desc: "ನಿಮ್ಮ ಆಯ್ಕೆಯ ಭಾಷೆಯಲ್ಲಿ ದಾಖಲೆಯನ್ನು ಸರಿಯಾಗಿ ಪೂರ್ಣಗೊಳಿಸಲು ಸುಲಭವಾಗಿ ಅರ್ಥವಾಗುವ ಸೂಚನೆಗಳು ಮತ್ತು ಮಾರ್ಗದರ್ಶನವನ್ನು ಪಡೆಯಿರಿ.",
+            step4_title: "ಸೂಚನೆಗಳನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ",
+            step4_desc: "ಭವಿಷ್ಯದ ಉಲ್ಲೇಖಕ್ಕಾಗಿ ಅಥವಾ ನಿಮಗೆ ಸಹಾಯ ಮಾಡಬಹುದಾದ ಇತರರೊಂದಿಗೆ ಹಂಚಿಕೊಳ್ಳಲು ಸಂಪೂರ್ಣ ಮಾರ್ಗದರ್ಶನವನ್ನು PDF ಆಗಿ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ.",
+            supported_documents: "ಸಮರ್ಥಿತ ದಾಖಲೆಗಳು",
+            doc_loan_applications: "ಸಾಲದ ಅರ್ಜಿಗಳು",
+            doc_kyc_forms: "ಕೆವೈಸಿ ಫಾರ್ಮ್‌ಗಳು",
+            doc_bank_statements: "ಬ್ಯಾಂಕ್ ಸ್ಟೇಟ್‌ಮೆಂಟ್‌ಗಳು",
+            doc_income_tax: "ಆದಾಯ ತೆರಿಗೆ ರಿಟರ್ನ್‌ಗಳು",
+            doc_govt_schemes: "ಸರ್ಕಾರಿ ಯೋಜನೆ ಫಾರ್ಮ್‌ಗಳು",
+            doc_farm_credit: "ಕೃಷಿ ಋಣ ದಾಖಲೆಗಳು",
+            doc_insurance: "ವಿಮೆ ಫಾರ್ಮ್‌ಗಳು",
+            doc_subsidy: "ಸಬ್ಸಿಡಿ ಅರ್ಜಿಗಳು"
+        }
+    };
+
+    // Merge local translations
+    Object.keys(localTranslations).forEach(lang => {
+        window.translations[lang] = { ...window.translations[lang], ...localTranslations[lang] };
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        let currentLanguage = 'en';
+        const languageButtons = document.querySelectorAll('.language-btn');
+        const languageContainers = document.querySelectorAll('.language-container');
+
+        function updateContent(language) {
+            console.log('Switching to language:', language);
+            currentLanguage = language;
+
+            // Update all elements with data-translate
+            document.querySelectorAll('[data-translate]').forEach(elem => {
+                const key = elem.getAttribute('data-translate');
+                if (window.translations[language] && window.translations[language][key]) {
+                    elem.textContent = window.translations[language][key];
+                } else {
+                    console.warn(`Translation missing for key: ${key} in language: ${language}`);
+                }
+            });
+
+            // Update button states
+            languageButtons.forEach(btn => {
+                btn.classList.toggle('btn-primary', btn.dataset.language === language);
+                btn.classList.toggle('btn-outline-primary', btn.dataset.language !== language);
+            });
+
+            // Show correct language container
+            languageContainers.forEach(container => {
+                container.classList.toggle('active', container.id === `analysis${language.charAt(0).toUpperCase() + language.slice(1)}`);
+            });
+        }
+
+        // Attach click handlers to language buttons
+        languageButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                updateContent(btn.dataset.language);
+            });
+        });
+
+        // File upload handling
+        const fileUploadArea = document.getElementById('fileUploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const statusCard = document.getElementById('statusCard');
+        const documentAnalysis = document.getElementById('documentAnalysis');
+        const documentTypeSelect = document.getElementById('documentType');
+
+        fileUploadArea.addEventListener('click', () => {
+            console.log('File upload area clicked');
+            fileInput.click();
+        });
+
+        fileUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.add('active');
+        });
+
+        fileUploadArea.addEventListener('dragleave', () => {
+            fileUploadArea.classList.remove('active');
+        });
+
+        fileUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.remove('active');
+            const files = e.dataTransfer.files;
+            if (files.length) {
+                console.log('File dropped:', files[0].name);
+                fileInput.files = files;
+                handleFileUpload(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length) {
+                console.log('File selected:', fileInput.files[0].name);
+                handleFileUpload(fileInput.files[0]);
+            }
+        });
+
+        async function handleFileUpload(file) {
+            console.log('Handling file upload:', file.name);
+            const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+            const maxSize = 10 * 1024 * 1024; // 10MB
+
+            if (!allowedTypes.includes(file.type)) {
+                alert('Invalid file type. Please upload PDF, JPG, PNG, or DOC/DOCX.');
+                console.error('Invalid file type:', file.type);
+                return;
+            }
+
+            if (file.size > maxSize) {
+                alert('File size exceeds 10MB limit.');
+                console.error('File too large:', file.size);
+                return;
+            }
+
+            statusCard.style.display = 'block';
+            documentAnalysis.style.display = 'none';
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('document_type', documentTypeSelect.value);
+            formData.append('language', currentLanguage);
+
+            try {
+                console.log('Sending request to /analyze_document');
+                const response = await fetch('/analyze_document', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                console.log('Response from /analyze_document:', data);
+
+                statusCard.style.display = 'none';
+                documentAnalysis.style.display = 'block';
+
+                if (data.error) {
+                    alert(`Error: ${data.error}`);
+                    console.error('Server error:', data.error);
+                    return;
+                }
+
+                // Update analysis results
+                ['en', 'hi', 'kn'].forEach(lang => {
+                    const summaryEl = document.getElementById(`docSummary${lang.charAt(0).toUpperCase() + lang.slice(1)}`);
+                    const requiredInfoEl = document.getElementById(`requiredInfo${lang.charAt(0).toUpperCase() + lang.slice(1)}`);
+                    const instructionsEl = document.getElementById(`filingInstructions${lang.charAt(0).toUpperCase() + lang.slice(1)}`);
+                    const notesEl = document.getElementById(`importantNotes${lang.charAt(0).toUpperCase() + lang.slice(1)}`);
+
+                    summaryEl.textContent = data.analysis[lang].summary || 'No summary available.';
+                    requiredInfoEl.innerHTML = data.analysis[lang].required_info?.map(item => `<li>${item}</li>`).join('') || '<li>No information available.</li>';
+                    instructionsEl.innerHTML = data.analysis[lang].instructions?.map(item => `<li>${item}</li>`).join('') || '<li>No instructions available.</li>';
+                    notesEl.textContent = data.analysis[lang].notes || 'No additional notes.';
+                });
+
+            } catch (error) {
+                statusCard.style.display = 'none';
+                alert(`Error analyzing document: ${error.message}`);
+                console.error('Upload error:', error);
+            }
+        }
+
+        // Initialize content
+        console.log('Initializing content for language:', currentLanguage);
+        updateContent(currentLanguage);
+    });
+</script>
+{% endblock %}

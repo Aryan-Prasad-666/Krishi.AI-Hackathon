@@ -1,0 +1,314 @@
+{% extends 'base.html' %}
+
+{% block title %}Krishi.ai - Weather and Agricultural Advisory{% endblock %}
+
+{% block extra_css %}
+<style>
+    .weather-card, .tips-card, .alert-card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .weather-card h3, .tips-card h3, .alert-card h3 {
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+    .weather-day {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #eee;
+    }
+    .weather-day:last-child {
+        border-bottom: none;
+    }
+    .weather-icon {
+        font-size: 1.5rem;
+        margin-right: 0.5rem;
+    }
+    .alert-card {
+        background-color: #fff3cd;
+        border: 1px solid #ffeeba;
+    }
+    .alert-card h3 {
+        color: #856404;
+    }
+    .loading-container {
+        display: none;
+        text-align: center;
+        padding: 2rem;
+    }
+    .spinner-border {
+        width: 3rem;
+        height: 3rem;
+        color: var(--primary-color);
+    }
+    @media (max-width: 576px) {
+        .weather-day {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .weather-day div {
+            margin-bottom: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Header -->
+    <h1 class="text-center mb-4" data-translate="weather_advisory_title">Weather and Agricultural Advisory</h1>
+    <p class="text-center mb-5" data-translate="weather_advisory_subtitle">Get the latest weather updates and agricultural tips to plan your farming activities effectively.</p>
+
+    <!-- Location Input Form -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-6">
+            <form id="weatherForm">
+                <div class="mb-3">
+                    <label for="location" class="form-label" data-translate="weather_location_label">Village/Town</label>
+                    <input type="text" class="form-control" id="location" name="location" required data-translate-placeholder="weather_location_placeholder" placeholder="Enter your village/town">
+                </div>
+                <div class="mb-3">
+                    <label for="district" class="form-label" data-translate="weather_district_label">District</label>
+                    <input type="text" class="form-control" id="district" name="district" required data-translate-placeholder="weather_district_placeholder" placeholder="Enter your district">
+                </div>
+                <div class="mb-3">
+                    <label for="state" class="form-label" data-translate="weather_state_label">State</label>
+                    <input type="text" class="form-control" id="state" name="state" required data-translate-placeholder="weather_state_placeholder" placeholder="Enter your state">
+                </div>
+                <button type="submit" class="btn btn-primary w-100" data-translate="weather_search_button">Get Weather Updates</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loadingContainer" class="loading-container">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-3" data-translate="loading_weather">Loading weather data...</p>
+    </div>
+
+    <!-- Weather Forecast Section -->
+    <div id="weatherSection" class="weather-card" style="display: none;">
+        <h3 data-translate="weather_daily_forecast">Daily Weather Forecast</h3>
+        <div id="dailyForecast"></div>
+        <h3 class="mt-4" data-translate="weather_weekly_forecast">Weekly Weather Forecast</h3>
+        <div id="weeklyForecast"></div>
+    </div>
+
+    <!-- Agricultural Tips Section -->
+    <div id="tipsSection" class="tips-card" style="display: none;">
+        <h3 data-translate="weather_agri_tips">Agricultural Tips</h3>
+        <ul id="agriTips"></ul>
+    </div>
+
+    <!-- Weather Alerts Section -->
+    <div id="alertSection" class="alert-card" style="display: none;">
+        <h3 data-translate="weather_alerts">Weather Alerts</h3>
+        <p id="weatherAlerts"></p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Translation additions for weather advisory page
+    translations.en = {
+        ...translations.en,
+        weather_advisory_title: "Weather and Agricultural Advisory",
+        weather_advisory_subtitle: "Get the latest weather updates and agricultural tips to plan your farming activities effectively.",
+        weather_location_label: "Village/Town",
+        weather_district_label: "District",
+        weather_state_label: "State",
+        weather_location_placeholder: "Enter your village/town",
+        weather_district_placeholder: "Enter your district",
+        weather_state_placeholder: "Enter your state",
+        weather_search_button: "Get Weather Updates",
+        weather_daily_forecast: "Daily Weather Forecast",
+        weather_weekly_forecast: "Weekly Weather Forecast",
+        weather_agri_tips: "Agricultural Tips",
+        weather_alerts: "Weather Alerts",
+        loading_weather: "Loading weather data..."
+    };
+
+    translations.hi = {
+        ...translations.hi,
+        weather_advisory_title: "मौसम और कृषि सलाह",
+        weather_advisory_subtitle: "नवीनतम मौसम अपडेट और कृषि सुझाव प्राप्त करें ताकि आप अपनी खेती की गतिविधियों को प्रभावी ढंग से योजना बना सकें।",
+        weather_location_label: "गाँव/शहर",
+        weather_district_label: "जिला",
+        weather_state_label: "राज्य",
+        weather_location_placeholder: "अपना गाँव/शहर दर्ज करें",
+        weather_district_placeholder: "अपना जिला दर्ज करें",
+        weather_state_placeholder: "अपना राज्य दर्ज करें",
+        weather_search_button: "मौसम अपडेट प्राप्त करें",
+        weather_daily_forecast: "दैनिक मौसम पूर्वानुमान",
+        weather_weekly_forecast: "साप्ताहिक मौसम पूर्वानुमान",
+        weather_agri_tips: "कृषि सुझाव",
+        weather_alerts: "मौसम अलर्ट",
+        loading_weather: "मौसम डेटा लोड हो रहा है..."
+    };
+
+    translations.kn = {
+        ...translations.kn,
+        weather_advisory_title: "ಹವಾಮಾನ ಮತ್ತು ಕೃಷಿ ಸಲಹೆ",
+        weather_advisory_subtitle: "ನಿಮ್ಮ ಕೃಷಿ ಚಟುವಟಿಕೆಗಳನ್ನು ಪರಿಣಾಮಕಾರಿಯಾಗಿ ಯೋಜಿಸಲು ಇತ್ತೀಚಿನ ಹವಾಮಾನ ಅಪ್‌ಡೇಟ್‌ಗಳು ಮತ್ತು ಕೃಷಿ ಸಲಹೆಗಳನ್ನು ಪಡೆಯಿರಿ.",
+        weather_location_label: "ಗ್ರಾಮ/ಪಟ್ಟಣ",
+        weather_district_label: "ಜಿಲ್ಲೆ",
+        weather_state_label: "ರಾಜ್ಯ",
+        weather_location_placeholder: "ನಿಮ್ಮ ಗ್ರಾಮ/ಪಟ್ಟಣವನ್ನು ನಮೂದಿಸಿ",
+        weather_district_placeholder: "ನಿಮ್ಮ ಜಿಲ್ಲೆಯನ್ನು ನಮೂದಿಸಿ",
+        weather_state_placeholder: "ನಿಮ್ಮ ರಾಜ್ಯವನ್ನು ನಮೂದಿಸಿ",
+        weather_search_button: "ಹವಾಮಾನ ಅಪ್‌ಡೇಟ್‌ಗಳನ್ನು ಪಡೆಯಿರಿ",
+        weather_daily_forecast: "ದೈನಂದಿನ ಹವಾಮಾನ ಮುನ್ಸೂಚನೆ",
+        weather_weekly_forecast: "ಸಾಪ್ತಾಹಿಕ ಹವಾಮಾನ ಮುನ್ಸೂಚನೆ",
+        weather_agri_tips: "ಕೃಷಿ ಸಲಹೆಗಳು",
+        weather_alerts: "ಹವಾಮಾನ ಎಚ್ಚರಿಕೆಗಳು",
+        loading_weather: "ಹವಾಮಾನ ಡೇಟಾ ಲೋಡ್ ಆಗುತ್ತಿದೆ..."
+    };
+
+    translations.ta = {
+        ...translations.ta,
+        weather_advisory_title: "வானிலை மற்றும் வேளாண் ஆலோசனை",
+        weather_advisory_subtitle: "உங்கள் விவசாய நடவடிக்கைகளை திறம்பட திட்டமிட, சமீபத்திய வானிலை புதுப்பிப்புகள் மற்றும் வேளாண் குறிப்புகளைப் பெறுங்கள்.",
+        weather_location_label: "கிராமம்/பட்டணம்",
+        weather_district_label: "மாவட்டம்",
+        weather_state_label: "மாநிலம்",
+        weather_location_placeholder: "உங்கள் கிராமம்/பட்டணத்தை உள்ளிடவும்",
+        weather_district_placeholder: "உங்கள் மாவட்டத்தை உள்ளிடவும்",
+        weather_state_placeholder: "உங்கள் மாநிலத்தை உள்ளிடவும்",
+        weather_search_button: "வானிலை புதுப்பிப்புகளைப் பெறவும்",
+        weather_daily_forecast: "தினசரி வானிலை முன்னறிவிப்பு",
+        weather_weekly_forecast: "வாராந்திர வானிலை முன்னறிவிப்பு",
+        weather_agri_tips: "வேளாண் குறிப்புகள்",
+        weather_alerts: "வானிலை எச்சரிக்கைகள்",
+        loading_weather: "வானிலை தரவு ஏற்றப்படுகிறது..."
+    };
+
+    translations.te = {
+        ...translations.te,
+        weather_advisory_title: "వాతావరణం మరియు వ్యవసాయ సలహా",
+        weather_advisory_subtitle: "మీ వ్యవసాయ కార్యకలాపాలను సమర్థవంతంగా ప్లాన్ చేయడానికి తాజా వాతావరణ నవీకరణలు మరియు వ్యవసాయ చిట్కాలను పొందండి.",
+        weather_location_label: "గ్రామం/పట్టణం",
+        weather_district_label: "జిల్లా",
+        weather_state_label: "రాష్ట్రం",
+        weather_location_placeholder: "మీ గ్రామం/పట్టణాన్ని నమోదు చేయండి",
+        weather_district_placeholder: "మీ జిల్లాను నమోదు చేయండి",
+        weather_state_placeholder: "మీ రాష్ట్రాన్ని నమోదు చేయండి",
+        weather_search_button: "వాతావరణ నవీకరణలను పొందండి",
+        weather_daily_forecast: "రోజువారీ వాతావరణ అంచనా",
+        weather_weekly_forecast: "వారపు వాతావరణ అంచనా",
+        weather_agri_tips: "వ్యవసాయ చిట్కాలు",
+        weather_alerts: "వాతావరణ హెచ్చరికలు",
+        loading_weather: "వాతావరణ డేటా లోడ్ అవుతోంది..."
+    };
+
+    document.getElementById('weatherForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const location = document.getElementById('location').value.trim();
+        const district = document.getElementById('district').value.trim();
+        const state = document.getElementById('state').value.trim();
+        const loadingContainer = document.getElementById('loadingContainer');
+        const weatherSection = document.getElementById('weatherSection');
+        const tipsSection = document.getElementById('tipsSection');
+        const alertSection = document.getElementById('alertSection');
+
+        if (!location || !district || !state) {
+            alert('Please fill in all location fields.');
+            return;
+        }
+
+        // Show loading, hide other sections
+        loadingContainer.style.display = 'block';
+        weatherSection.style.display = 'none';
+        tipsSection.style.display = 'none';
+        alertSection.style.display = 'none';
+
+        try {
+            const response = await fetch('/weather_advisory_data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ location, district, state }),
+            });
+
+            const data = await response.json();
+
+            // Hide loading
+            loadingContainer.style.display = 'none';
+
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+
+            // Display Daily Forecast
+            const dailyForecast = document.getElementById('dailyForecast');
+            dailyForecast.innerHTML = '';
+            data.daily_forecast.forEach(day => {
+                const div = document.createElement('div');
+                div.className = 'weather-day';
+                div.innerHTML = `
+                    <div><strong>${day.date}</strong></div>
+                    <div><i class="fas fa-${day.icon} weather-icon"></i> ${day.condition}</div>
+                    <div>${day.temperature}°C</div>
+                    <div>Humidity: ${day.humidity}%</div>
+                `;
+                dailyForecast.appendChild(div);
+            });
+
+            // Display Weekly Forecast
+            const weeklyForecast = document.getElementById('weeklyForecast');
+            weeklyForecast.innerHTML = '';
+            data.weekly_forecast.forEach(day => {
+                const div = document.createElement('div');
+                div.className = 'weather-day';
+                div.innerHTML = `
+                    <div><strong>${day.date}</strong></div>
+                    <div><i class="fas fa-${day.icon} weather-icon"></i> ${day.condition}</div>
+                    <div>Min: ${day.min_temp}°C / Max: ${day.max_temp}°C</div>
+                `;
+                weeklyForecast.appendChild(div);
+            });
+
+            // Display Agricultural Tips
+            const agriTips = document.getElementById('agriTips');
+            agriTips.innerHTML = '';
+            data.agricultural_tips.forEach(tip => {
+                const li = document.createElement('li');
+                li.textContent = tip;
+                agriTips.appendChild(li);
+            });
+
+            // Display Weather Alerts
+            const weatherAlerts = document.getElementById('weatherAlerts');
+            weatherAlerts.textContent = data.weather_alerts || 'No extreme weather alerts at this time.';
+
+            // Show sections
+            weatherSection.style.display = 'block';
+            tipsSection.style.display = 'block';
+            alertSection.style.display = 'block';
+        } catch (error) {
+            // Hide loading
+            loadingContainer.style.display = 'none';
+            console.error('Error fetching weather data:', error);
+            alert('Unable to fetch weather data. Please try again later.');
+        }
+    });
+
+    // Update placeholder translations
+    document.querySelectorAll('[data-translate-placeholder]').forEach(element => {
+        const key = element.getAttribute('data-translate-placeholder');
+        if (translations[currentLang] && translations[currentLang][key]) {
+            element.placeholder = translations[currentLang][key];
+        }
+    });
+</script>
+{% endblock %}
