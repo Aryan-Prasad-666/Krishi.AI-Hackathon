@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+
+{% block title %}Krishi.ai - Product Search{% endblock %}
+
+{% block extra_css %}
+<style>
+    .products-section {
+        padding: 80px 0;
+        background: url('https://images.pexels.com/photos/2933243/pexels-photo-2933243.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2') no-repeat center center;
+        background-size: cover;
+        background-attachment: fixed;
+        min-height: 100vh; /* Ensure consistent height */
+        text-align: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Semi-transparent overlay for readability */
+    .products-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.7); /* Increased opacity */
+        z-index: -1;
+    }
+
+    .products-section h2 {
+        font-size: 38px;
+        margin-bottom: 20px;
+        color: var(--dark-color);
+        text-transform: uppercase;
+    }
+
+    .products-section p {
+        font-size: 18px;
+        line-height: 1.6;
+        max-width: 700px;
+        margin: 0 auto 40px;
+        color: #3a2b1f;
+    }
+
+    .form-container {
+        max-width: 600px;
+        margin: 0 auto 40px;
+        padding: 20px;
+        background: #fff;
+        border-radius: 15px;
+        border: 1px solid var(--accent-color);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-container form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .form-container input {
+        padding: 12px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .form-container button {
+        background: linear-gradient(45deg, var(--accent-color), #d4a017);
+        color: var(--dark-color);
+        padding: 12px;
+        font-size: 18px;
+        font-weight: 700;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .form-container button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(232, 185, 35, 0.6);
+    }
+
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        padding: 0 20px;
+        margin-bottom: 40px;
+    }
+
+    .product-card {
+        background: #fff;
+        padding: 20px;
+        border-radius: 15px;
+        border: 1px solid var(--accent-color);
+        position: relative;
+        overflow: hidden;
+        min-height: 250px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .product-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px; /* Fixed to match gradient bar */
+        background: linear-gradient(90deg, var(--accent-color), #d4a017);
+    }
+
+    .product-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .product-card h3 {
+        font-size: 22px;
+        margin-bottom: 10px;
+        color: var(--dark-color);
+    }
+
+    .product-card p {
+        font-size: 16px;
+        color: #3a2b1f;
+        margin-bottom: 10px;
+    }
+
+    .product-card a {
+        color: var(--accent-color);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .product-card a:hover {
+        color: #d4a017;
+    }
+
+    .error-message, .no-products-message {
+        color: #d32f2f;
+        font-size: 16px;
+        margin-bottom: 20px;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 10px;
+        border-radius: 8px;
+    }
+
+    /* Loading animation */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+    }
+
+    .spinner {
+        border: 8px solid #f3f3f3;
+        border-top: 8px solid var(--accent-color);
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+        .products-section h2 {
+            font-size: 32px;
+        }
+
+        .products-section p {
+            font-size: 16px;
+        }
+
+        .form-container {
+            padding: 15px;
+        }
+
+        .product-card {
+            min-height: 300px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+</div>
+
+<div class="products-section">
+    <div class="container">
+        <h2 data-translate="products_title">Find Agricultural Products</h2>
+        <p data-translate="products_description">Enter a product name (e.g., tractor, plough) to discover details, prices, and certification status.</p>
+
+        <div class="form-container">
+            <form method="POST" action="/products" id="productsForm">
+                <input type="text" name="product" placeholder="Product Name (e.g., Tractor, Plough)" data-translate-placeholder="form_product_placeholder">
+                <button type="submit" data-translate="form_submit">Search Product</button>
+            </form>
+        </div>
+
+        {% if error_message %}
+            <div class="error-message">{{ error_message }}</div>
+        {% endif %}
+
+        {% if products %}
+        <h3 data-translate="all_products_title">Available Products</h3>
+        <div class="products-grid">
+            {% for product in products %}
+            <div class="product-card">
+                <h3>{{ product.name }}</h3>
+                <p><strong>Description:</strong> {{ product.description }}</p>
+                <p><strong>Price:</strong> {{ product.price }}</p>
+                <p><strong>Certified:</strong> {{ product.certified }}</p>
+                <p><strong>Link:</strong> <a href="{{ product.link }}" target="_blank">{{ product.link }}</a></p>
+            </div>
+            {% endfor %}
+        </div>
+        {% elif form_submitted %}
+        <p class="no-products-message" data-translate="no_products">No products found for your criteria.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Animate elements on scroll
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.animation = 'fadeInUp 1s ease-out forwards';
+            }
+        });
+    }, { threshold: 0.2 });
+
+    document.querySelectorAll('.product-card, .products-section h2, .products-section h3, .products-section p').forEach(el => {
+        observer.observe(el);
+    });
+
+    // Loading animation
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('productsForm');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
+        // Hide loader when page loads
+        loadingOverlay.style.display = 'none';
+
+        // Show loader on form submission
+        form.addEventListener('submit', () => {
+            loadingOverlay.style.display = 'flex';
+        });
+    });
+</script>
+{% endblock %}

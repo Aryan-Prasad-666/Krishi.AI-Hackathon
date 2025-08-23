@@ -1,0 +1,37 @@
+[
+  {
+    "name": "Mahindra JIVO 305 DI VINEYARD 4WD",
+    "description": "18.3 kW (24.5 HP) tractor specifically designed for vineyards and inter-culture operations. Known for unmatched performance, power & mileage.",
+    "price": "\u20b9 5,77,800 - \u20b9 6,18,460",
+    "certified": "Yes - CFMTTI (Budni)",
+    "link": "https://www.mahindratractor.com/tractors/jivo-305-di-4wd-vineyard"
+  },
+  {
+    "name": "John Deere 5050E",
+    "description": "50 HP utility tractor with a 3-cylinder, 2900 CC engine (some sources state 2400cc) producing 2400 RPM. Manufactured in Pune, Maharashtra, India.",
+    "price": "\u20b9 8.58 Lakh - \u20b9 9.22 Lakh",
+    "certified": "Yes - CFMTTI (Budni)",
+    "link": "https://www.tractorjunction.com/john-deere-tractor/5050-e/"
+  },
+  {
+    "name": "Sonalika DI 745 III",
+    "description": "50 HP tractor with a powerful 3-cylinder, 3065 cc engine, delivering excellent performance and productivity at 1900 rated RPM.",
+    "price": "\u20b9 7.23 Lakh - \u20b9 7.74 Lakh",
+    "certified": "Yes - CFMTTI (Budni)",
+    "link": "https://www.sonalika.com/tractor/di-745-iii.html"
+  },
+  {
+    "name": "Swaraj 744 FE",
+    "description": "45-50 HP category tractor (often cited as 47 HP), equipped with a 3-cylinder, 3136 cc engine, providing real value for money to its owners.",
+    "price": "\u20b9 7.31 Lakh - \u20b9 7.84 Lakh",
+    "certified": "Yes - CFMTTI (Budni)",
+    "link": "https://www.swarajtractors.com/swaraj-744-fe-tractor"
+  },
+  {
+    "name": "Eicher 380",
+    "description": "40 HP tractor with a strong 3-cylinder, 2500 cc engine, designed to deliver superior performance across a wide range of farming tasks.",
+    "price": "\u20b9 6.26 Lakh - \u20b9 7.00 Lakh",
+    "certified": "Yes - CFMTTI (Budni)",
+    "link": "https://eichertractors.in/eichertractors/eicher-tractor-380"
+  }
+]
