@@ -1,0 +1,455 @@
+{% extends "base.html" %}
+
+{% block title %}
+Krishi.ai - Veterinary Assistant
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-color: #3a2b1f;
+        --accent-color: #e8b923;
+        --light-color: #F9F4E8;
+        --text-color: #333;
+        --kohl-black: #121212;
+        --kumkum-gold: #e8b923;
+        --sandalwood-cream: #F5EFE6;
+        --indigo-stone: #2E3A59;
+        --peepal-green: #6E8C61;
+        --regal-midnight-blue: #1A2238;
+        --ivory-white: #FAF9F6;
+        --shadow-dark: rgba(0, 0, 0, 0.4);
+        --shadow-light: rgba(0, 0, 0, 0.2);
+        --glow-gold: rgba(232, 185, 35, 0.3);
+        --glow-green: rgba(110, 140, 97, 0.3);
+    }
+
+    body {
+        font-family: 'Montserrat', sans-serif;
+        background: linear-gradient(180deg, var(--light-color) 0%, #e8e8e8 100%);
+        color: var(--text-color);
+        overflow-x: hidden;
+    }
+
+    .hero-section {
+        background: linear-gradient(rgba(58, 47, 30, 0.8), rgba(58, 47, 30, 0.9)), url('https://source.unsplash.com/random/1200x800/?livestock,india,rural');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        padding: 4rem 0;
+        margin-bottom: 3rem;
+    }
+
+    .chat-container {
+        max-width: 900px;
+        margin: 2rem auto 4rem;
+        padding: 2.5rem;
+        background: white;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        position: relative;
+    }
+
+    .chat-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .chat-header h2 {
+        font-weight: 700;
+        font-size: 2rem;
+        color: var(--primary-color);
+    }
+
+    .chat-box {
+        width: 100%;
+        height: 400px;
+        overflow-y: auto;
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+        border: 1px solid #e0e0e0;
+    }
+
+    .message {
+        margin-bottom: 1.2rem;
+        padding: 1rem;
+        border-radius: 10px;
+        max-width: 80%;
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+
+    .user-message {
+        background: var(--accent-color);
+        color: white;
+        margin-left: auto;
+        text-align: right;
+    }
+
+    .bot-message {
+        background: var(--sandalwood-cream);
+        color: var(--text-color);
+        margin-right: auto;
+        border: 1px solid #ddd;
+    }
+
+    .bot-message ul {
+        padding-left: 20px;
+        margin: 0.5rem 0;
+    }
+
+    .bot-message li {
+        margin-bottom: 0.5rem;
+        list-style-type: disc;
+    }
+
+    .bot-message p {
+        margin: 0.5rem 0;
+    }
+
+    .input-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: #fff;
+        border-radius: 10px;
+        padding: 0.5rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-control {
+        flex: 1;
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        color: var(--text-color);
+        font-weight: 400;
+        height: 50px;
+    }
+
+    .form-control:focus {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 5px rgba(232, 185, 35, 0.5);
+    }
+
+    .form-control::placeholder {
+        color: #6c757d;
+    }
+
+    .btn-send {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.8rem 1.5rem;
+    }
+
+    .btn-mic {
+        background: var(--indigo-stone);
+        color: var(--sandalwood-cream);
+        border: none;
+        border-radius: 8px;
+        padding: 0.8rem 1.5rem;
+    }
+
+    .btn-mic.active {
+        background: var(--peepal-green);
+        color: var(--ivory-white);
+    }
+
+    .lang-select {
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        padding: 0.5rem;
+        color: var(--text-color);
+        height: 50px;
+    }
+
+    .lang-select:focus {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 5px rgba(232, 185, 35, 0.5);
+    }
+
+    .info-box {
+        background-color: var(--light-color);
+        border-left: 4px solid var(--accent-color);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border-radius: 0.25rem;
+    }
+
+    .chat-box::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .chat-box::-webkit-scrollbar-track {
+        background: #e0e0e0;
+    }
+
+    .chat-box::-webkit-scrollbar-thumb {
+        background: var(--accent-color);
+        border-radius: 10px;
+    }
+
+    @media (max-width: 768px) {
+        .hero-section {
+            padding: 2rem 0;
+        }
+        .chat-container {
+            margin: 1rem;
+            padding: 1.5rem;
+        }
+        .chat-box {
+            height: 300px;
+        }
+        .input-group {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .form-control, .btn-mic, .btn-send, .lang-select {
+            width: 100%;
+            border-radius: 8px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold" data-translate="veterinary_assistant_title">Veterinary Assistant</h1>
+        <p class="lead" data-translate="veterinary_assistant_subtitle">Chat with our assistant to get guidance on livestock health, animal diseases, and veterinary care in your preferred language</p>
+    </div>
+</section>
+
+<!-- Main Content -->
+<div class="container mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Info Box -->
+            <div class="info-box">
+                <h5 class="mb-2" data-translate="why_use_veterinary_assistant">Why use our Veterinary Assistant?</h5>
+                <p class="mb-0" data-translate="veterinary_assistant_info">Our Veterinary Assistant provides clear and practical advice on livestock health, common animal diseases, and veterinary care for rural Indian farmers. Ask your questions via text or voice in English, Hindi, or Kannada.</p>
+            </div>
+
+            <!-- Chat Container -->
+            <div class="chat-container">
+                <div class="chat-header">
+                    <h2 data-translate="veterinary_assistant_header">Veterinary Assistant</h2>
+                </div>
+                <div class="chat-box" id="chat-box">
+                    {% for message in messages %}
+                        {% if message.role == 'user' %}
+                            <div class="message user-message">{{ message.content }}</div>
+                        {% else %}
+                            <div class="message bot-message">{{ message.content | safe }}</div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="input-group">
+                    <button class="btn btn-mic" id="mic-btn"><i class="fas fa-microphone"></i></button>
+                    <input type="text" id="user-input" class="form-control" data-translate="placeholder" placeholder="Ask about livestock health, animal diseases, or care...">
+                    <button class="btn btn-send" id="send-btn"><i class="fas fa-paper-plane"></i></button>
+                    <select class="lang-select" id="lang-select">
+                        <option value="en-US" data-header="Veterinary Assistant" data-placeholder="Ask about livestock health, animal diseases, or care...">English</option>
+                        <option value="hi-IN" data-header="पशु चिकित्सा सहायक" data-placeholder="पशुधन स्वास्थ्य, पशु रोग, या देखभाल के बारे में पूछें...">Hindi</option>
+                        <option value="kn-IN" data-header="ಪಶುವೈದ್ಯಕೀಯ ಸಹಾಯಕ" data-placeholder="ಪಶು ಆರೋಗ್ಯ, ಪಶು ರೋಗಗಳು, ಅಥವಾ ಕಾಳಜಿಯ ಬಗ್ಗೆ ಕೇಳಿ...">Kannada</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Translations for Veterinary Assistant UI
+    translations.en = {
+        ...translations.en || {},
+        veterinary_assistant_title: "Veterinary Assistant",
+        veterinary_assistant_subtitle: "Chat with our assistant to get guidance on livestock health, animal diseases, and veterinary care in your preferred language",
+        why_use_veterinary_assistant: "Why use our Veterinary Assistant?",
+        veterinary_assistant_info: "Our Veterinary Assistant provides clear and practical advice on livestock health, common animal diseases, and veterinary care for rural Indian farmers. Ask your questions via text or voice in English, Hindi, or Kannada.",
+        veterinary_assistant_header: "Veterinary Assistant",
+        placeholder: "Ask about livestock health, animal diseases, or care...",
+        voice_not_supported: "Voice input is not supported in this browser.",
+        voice_error: "Error with voice input. Please try again.",
+        error_api: "Error: Failed to get response from the server."
+    };
+    translations.hi = {
+        ...translations.hi || {},
+        veterinary_assistant_title: "पशु चिकित्सा सहायक",
+        veterinary_assistant_subtitle: "हमारे सहायक के साथ चैट करें और अपनी पसंदीदा भाषा में पशुधन स्वास्थ्य, पशु रोग, और पशु चिकित्सा देखभाल पर मार्गदर्शन प्राप्त करें",
+        why_use_veterinary_assistant: "हमारा पशु चिकित्सा सहायक क्यों उपयोग करें?",
+        veterinary_assistant_info: "हमारा पशु चिकित्सा सहायक ग्रामीण भारतीय किसानों के लिए पशुधन स्वास्थ्य, सामान्य पशु रोग, और पशु चिकित्सा देखभाल पर स्पष्ट और व्यावहारिक सलाह प्रदान करता है। अंग्रेजी, हिंदी, या कन्नड़ में अपने प्रश्न टेक्स्ट या वॉयस के माध्यम से पूछें।",
+        veterinary_assistant_header: "पशु चिकित्सा सहायक",
+        placeholder: "पशुधन स्वास्थ्य, पशु रोग, या देखभाल के बारे में पूछें...",
+        voice_not_supported: "इस ब्राउज़र में वॉयस इनपुट समर्थित नहीं है।",
+        voice_error: "वॉयस इनपुट में त्रुटि। कृपया पुनः प्रयास करें।",
+        error_api: "त्रुटि: सर्वर से प्रतिक्रिया प्राप्त करने में विफल।"
+    };
+    translations.kn = {
+        ...translations.kn || {},
+        veterinary_assistant_title: "ಪಶುವೈದ್ಯಕೀಯ ಸಹಾಯಕ",
+        veterinary_assistant_subtitle: "ನಮ್ಮ ಸಹಾಯಕರೊಂದಿಗೆ ಚಾಟ್ ಮಾಡಿ ಮತ್ತು ನಿಮ್ಮ ಆದಾಯತೆಯ ಭಾಷೆಯಲ್ಲಿ ಪಶು ಆರೋಗ್ಯ, ಪಶು ರೋಗಗಳು ಮತ್ತು ಪಶುವೈದ್ಯಕೀಯ ಕಾಳಜಿಯ ಬಗ್ಗೆ ಮಾರ್ಗದರ್ಶನ ಪಡೆಯಿರಿ",
+        why_use_veterinary_assistant: "ನಮ್ಮ ಪಶುವೈದ್ಯಕೀಯ ಸಹಾಯಕವನ್ನು ಏಕೆ ಬಳಸಬೇಕು?",
+        veterinary_assistant_info: "ನಮ್ಮ ಪಶುವೈದ್ಯಕೀಯ ಸಹಾಯಕವು ಗ್ರಾಮೀಣ ಭಾರತದ ರೈತರಿಗಾಗಿ ಪಶು ಆರೋಗ್ಯ, ಸಾಮಾನ್ಯ ಪಶು ರೋಗಗಳು ಮತ್ತು ಪಶುವೈದ್ಯಕೀಯ ಕಾಳಜಿಯ ಬಗ್ಗೆ ಸ್ಪಷ್ಟ ಮತ್ತು ಪ್ರಾಯೋಗಿಕ ಸಲಹೆಯನ್ನು ಒದಗಿಸುತ್ತದೆ। ಇಂಗ್ಲಿಷ್, ಹಿಂದಿ, ಅಥವಾ ಕನ್ನಡದಲ್ಲಿ ನಿಮ್ಮ ಪ್ರಶ್ನೆಗಳನ್ನು ಟೆಕ್ಸ್ಟ್ ಅಥವಾ ಧ್ವನಿಯ ಮೂಲಕ ಕೇಳಿ।",
+        veterinary_assistant_header: "ಪಶುವೈದ್ಯಕೀಯ ಸಹಾಯಕ",
+        placeholder: "ಪಶು ಆರೋಗ್ಯ, ಪಶು ರೋಗಗಳು, ಅಥವಾ ಕಾಳಜಿಯ ಬಗ್ಗೆ ಕೇಳಿ...",
+        voice_not_supported: "ಈ ಬ್ರೌಸರ್‌ನಲ್ಲಿ ಧ್ವನಿ ಒಳಸೇರಿಕೆಯನ್ನು ಬೆಂಬಲಿಸಲಾಗುವುದಿಲ್ಲ।",
+        voice_error: "ಧ್ವನಿ ಒಳಗೊಳ್ಳುವಿಕೆಯಲ್ಲಿ ದೋಷ। ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ।",
+        error_api: "ದೋಷ: ಸರ್ವರ್‌ನಿಂದ ಪ್ರತಿಕ್ರಿಯೆಯನ್ನು ಪಡೆಯಲು ವಿಫಲವಾಗಿದೆ।"
+    };
+
+    // Chatbot functionality
+    document.addEventListener('DOMContentLoaded', () => {
+        const chatBox = document.getElementById('chat-box');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const micBtn = document.getElementById('mic-btn');
+        const langSelect = document.getElementById('lang-select');
+        const chatHeader = document.getElementById('chat-box').parentElement.querySelector('h2');
+        const currentLanguage = getCurrentLanguage() || 'en';
+        updateContent(currentLanguage);
+
+        // Scroll to bottom of chat box
+        function scrollToBottom() {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Format bot response into HTML
+        function formatBotResponse(content) {
+            const lines = content.split('\n').filter(line => line.trim() !== '');
+            let htmlContent = '';
+            let inList = false;
+
+            lines.forEach(line => {
+                line = line.trim();
+                if (line.match(/^\s*[\*\-+\•]\s/)) {
+                    if (!inList) {
+                        htmlContent += '<ul>';
+                        inList = true;
+                    }
+                    const listItem = line.replace(/^\s*[\*\-+\•]\s/, '');
+                    htmlContent += `<li>${listItem}</li>`;
+                } else {
+                    if (inList) {
+                        htmlContent += '</ul>';
+                        inList = false;
+                    }
+                    htmlContent += `<p>${line}</p>`;
+                }
+            });
+
+            if (inList) {
+                htmlContent += '</ul>';
+            }
+
+            return htmlContent;
+        }
+
+        // Add message to chat box
+        function addMessage(content, isUser) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            messageDiv.innerHTML = isUser ? content : formatBotResponse(content);
+            chatBox.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        // Update UI elements based on selected language
+        function updateUIForLanguage() {
+            const selectedOption = langSelect.options[langSelect.selectedIndex];
+            chatHeader.textContent = selectedOption.getAttribute('data-header');
+            userInput.placeholder = selectedOption.getAttribute('data-placeholder');
+            updateContent(langSelect.value.split('-')[0]);
+        }
+
+        // Handle send message
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            addMessage(message, true);
+            userInput.value = '';
+
+            try {
+                const response = await fetch('/veterinary_assistant', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userInput: message,
+                        language: langSelect.value.split('-')[0]
+                    })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    addMessage(data.response, false);
+                } else {
+                    addMessage(translations[currentLanguage].error_api || 'Error: ' + (data.error || 'Something went wrong'), false);
+                }
+            } catch (error) {
+                addMessage(translations[currentLanguage].error_api || 'Error: Failed to connect to the server', false);
+            }
+        }
+
+        // Voice Input Functionality
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = null;
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            recognition.lang = langSelect.value;
+            langSelect.addEventListener('change', () => {
+                recognition.lang = langSelect.value;
+                updateUIForLanguage();
+            });
+
+            recognition.onstart = () => {
+                micBtn.classList.add('active');
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                userInput.value = transcript;
+                micBtn.classList.remove('active');
+            };
+
+            recognition.onend = () => {
+                micBtn.classList.remove('active');
+            };
+
+            recognition.onerror = (event) => {
+                addMessage(translations[currentLanguage].voice_error || 'Error with voice input: ' + event.error, false);
+                micBtn.classList.remove('active');
+            };
+
+            micBtn.addEventListener('click', () => {
+                if (!micBtn.classList.contains('active')) {
+                    recognition.start();
+                } else {
+                    recognition.stop();
+                }
+            });
+        } else {
+            micBtn.disabled = true;
+            micBtn.title = translations[currentLanguage].voice_not_supported || 'Voice input is not supported in this browser.';
+            addMessage(translations[currentLanguage].voice_not_supported || 'Voice input is not supported in this browser.', false);
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        updateUIForLanguage();
+        scrollToBottom();
+    });
+</script>
+{% endblock %}
