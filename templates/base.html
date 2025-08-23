@@ -197,6 +197,11 @@
                     <li class="nav-item">
                         <a class="nav-link" href="/telegram" data-translate="nav_telegram">Telegram Bot</a>
                     </li>
+                    {% if username %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/logout" data-translate="nav_logout">Logout</a>
+                        </li>
+                    {% endif %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fas fa-globe me-1"></i><span data-translate="nav_language">Language</span>
@@ -237,7 +242,7 @@
                         <li><a href="/disease" data-translate="footer_disease_pest_control">Disease & Pest Control</a></li>
                         <li><a href="/weather_advisory" data-translate="footer_weather_advisory">Weather Advisory</a></li>
                         <li><a href="/financial_assistant" data-translate="footer_financial_assistant">Financial Assistant</a></li>
-                        <li><a href="/document_analyzer" data-translate="footer_document_analyzer">Document Analyzer</a></li>
+                        <li><a class="dropdown-item" href="/document_analyzer" data-translate="nav_document_analyzer">Document Analyzer</a></li>
                         <li><a href="/legal_assistant" data-translate="footer_legal_assistant">Legal Assistant</a></li>
                         <li><a href="/veterinary_assistant" data-translate="footer_veterinary_assistant">Veterinary Assistant</a></li>
                         <li><a href="/schemes" data-translate="footer_schemes">Government Schemes</a></li>
@@ -302,7 +307,7 @@
                 nav_veterinary_assistant: "Veterinary Assistant",
                 nav_about: "About Us",
                 nav_telegram: "Telegram Bot",
-                nav_language: "Language",
+                nav_logout: "Logout",
                 footer_krishi_ai: "Krishi.ai",
                 footer_description: "Empowering rural India with AI-driven solutions for agriculture, finance, and governance, fostering sustainable growth and resilience.",
                 footer_services: "Services",
@@ -360,7 +365,7 @@
                 nav_veterinary_assistant: "पशु चिकित्सा सहायक",
                 nav_about: "हमारे बारे में",
                 nav_telegram: "टेलीग्राम बॉट",
-                nav_language: "भाषा",
+                nav_logout: "लॉगआउट",
                 footer_krishi_ai: "कृषि.एआई",
                 footer_description: "ग्रामीण भारत को कृषि, वित्त और शासन के लिए एआई-संचालित समाधानों के साथ सशक्त बनाना, सतत विकास और लचीलापन को बढ़ावा देना।",
                 footer_services: "सेवाएँ",
@@ -418,7 +423,7 @@
                 nav_veterinary_assistant: "ಪಶುವೈದ್ಯಕೀಯ ಸಹಾಯಕ",
                 nav_about: "ನಮ್ಮ ಬಗ್ಗೆ",
                 nav_telegram: "ಟೆಲಿಗ್ರಾಮ್ ಬಾಟ್",
-                nav_language: "ಭಾಷೆ",
+                nav_logout: "ಲಾಗೌಟ್",
                 footer_krishi_ai: "ಕೃಷಿ.ಎಐ",
                 footer_description: "ಗ್ರಾಮೀಣ ಭಾರತವನ್ನು ಕೃಷಿ, ಆರ್ಥಿಕ ಮತ್ತು ಆಡಳಿತಕ್ಕಾಗಿ ಎಐ-ಚಾಲಿತ ಪರಿಹಾರಗಳೊಂದಿಗೆ ಸಬಲೀಕರಣಗೊಳಿಸುವುದು, ಸುಸ್ಥಿರ ಬೆಳವಣಿಗೆ ಮತ್ತು ಸ್ಥಿತಿಸ್ಥಾಪಕತ್ವವನ್ನು ಉತ್ತೇಜಿಸುವುದು。",
                 footer_services: "ಸೇವೆಗಳು",
