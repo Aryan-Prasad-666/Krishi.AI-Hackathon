@@ -1,0 +1,294 @@
+{% extends 'base.html' %}
+
+{% block title %}Krishi.ai - How to Use telegram bot{% endblock %}
+
+{% block extra_css %}
+<style>
+    .telegram-section {
+        padding: 60px 0;
+        background: linear-gradient(135deg, #f7b733 0%, #fc4a1a 100%);
+        color: #2a2a2a;
+        text-align: center;
+        min-height: 100vh;
+    }
+
+    .telegram-section h2 {
+        font-size: 36px;
+        font-weight: 700;
+        margin-bottom: 15px;
+        color: #ffffff;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .telegram-section p {
+        font-size: 18px;
+        line-height: 1.7;
+        max-width: 600px;
+        margin: 0 auto 30px;
+        color: #ffffff;
+        opacity: 0.9;
+    }
+
+    .timeline {
+        position: relative;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px 0;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 50%;
+        width: 4px;
+        height: 100%;
+        background: #ffffff;
+        transform: translateX(-50%);
+        opacity: 0.6;
+    }
+
+    .timeline-step {
+        position: relative;
+        margin: 40px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .step-card {
+        background: #ffffff;
+        width: 320px;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transition: transform 0.6s;
+        transform-style: preserve-3d;
+        cursor: pointer;
+        position: relative;
+    }
+
+    .step-card:hover {
+        transform: rotateY(180deg);
+    }
+
+    .step-front, .step-back {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 15px;
+        border-radius: 10px;
+    }
+
+    .step-front {
+        background: #ffffff;
+        color: #2a2a2a;
+    }
+
+    .step-back {
+        background: #f7b733;
+        color: #ffffff;
+        transform: rotateY(180deg);
+    }
+
+    .step-front i {
+        font-size: 32px;
+        color: #fc4a1a;
+        margin-bottom: 10px;
+    }
+
+    .step-front h3, .step-back h3 {
+        font-size: 20px;
+        margin-bottom: 10px;
+        font-weight: 600;
+    }
+
+    .step-front p, .step-back p {
+        font-size: 14px;
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    .timeline-step:nth-child(even) .step-card {
+        margin-left: auto;
+        margin-right: 50px;
+    }
+
+    .timeline-step:nth-child(odd) .step-card {
+        margin-right: auto;
+        margin-left: 50px;
+    }
+
+    .timeline-step::after {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        background: #fc4a1a;
+        border: 2px solid #ffffff;
+        border-radius: 50%;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1;
+    }
+
+    .cta-button {
+        background: #ffffff;
+        color: #fc4a1a;
+        padding: 12px 30px;
+        font-size: 18px;
+        font-weight: 700;
+        text-decoration: none;
+        border-radius: 30px;
+        display: inline-block;
+        margin-top: 30px;
+        transition: background 0.3s ease, color 0.3s ease;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .cta-button:hover {
+        background: #fc4a1a;
+        color: #ffffff;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .timeline-step {
+        animation: slideIn 0.8s ease-out forwards;
+    }
+
+    @media (max-width: 768px) {
+        .telegram-section h2 {
+            font-size: 28px;
+        }
+
+        .telegram-section p {
+            font-size: 16px;
+        }
+
+        .timeline::before {
+            left: 20px;
+        }
+
+        .timeline-step:nth-child(even) .step-card,
+        .timeline-step:nth-child(odd) .step-card {
+            margin-left: 40px;
+            margin-right: 20px;
+        }
+
+        .timeline-step::after {
+            left: 20px;
+        }
+
+        .step-card {
+            width: 260px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="telegram-section">
+    <div class="container mx-auto">
+        <h2 data-translate="telegram_title">How to Use @KrishiBot</h2>
+        <p data-translate="telegram_description">Get instant AI-powered assistance for farming, finance, and governance with @KrishiBot on Telegram, available in English, Hindi, and Kannada.</p>
+
+        <div class="timeline">
+            <div class="timeline-step">
+                <div class="step-card">
+                    <div class="step-front">
+                        <i class="fas fa-search"></i>
+                        <h3 data-translate="step_find_title">Find @KrishiBot</h3>
+                        <p data-translate="step_find_description">Search for <strong>@KrishiBot</strong> in Telegram or click the link below.</p>
+                    </div>
+                    <div class="step-back">
+                        <h3 data-translate="step_find_title">Find @KrishiBot</h3>
+                        <p>Open Telegram, tap the search icon, and type <strong>@KrishiBot</strong>. Select the bot from the results.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="timeline-step">
+                <div class="step-card">
+                    <div class="step-front">
+                        <i class="fas fa-play"></i>
+                        <h3 data-translate="step_start_title">Start the Chat</h3>
+                        <p data-translate="step_start_description">Tap <strong>Start</strong> or type <strong>/start</strong> to begin.</p>
+                    </div>
+                    <div class="step-back">
+                        <h3 data-translate="step_start_title">Start the Chat</h3>
+                        <p>Once you find @KrishiBot, press the <strong>Start</strong> button or send <strong>/start</strong> to get a welcome message.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="timeline-step">
+                <div class="step-card">
+                    <div class="step-front">
+                        <i class="fas fa-hand-pointer"></i>
+                        <h3 data-translate="step_select_title">Choose Assistant</h3>
+                        <p data-translate="step_select_description">Select Financial, Legal, or Veterinary Assistant and a language.</p>
+                    </div>
+                    <div class="step-back">
+                        <h3 data-translate="step_select_title">Choose Assistant</h3>
+                        <p>Pick an assistant type (e.g., Financial) and your preferred language (English, Hindi, or Kannada) from the menu.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="timeline-step">
+                <div class="step-card">
+                    <div class="step-front">
+                        <i class="fas fa-question"></i>
+                        <h3 data-translate="step_ask_title">Ask Questions</h3>
+                        <p data-translate="step_ask_description">Ask about loans, land disputes, or livestock health.</p>
+                    </div>
+                    <div class="step-back">
+                        <h3 data-translate="step_ask_title">Ask Questions</h3>
+                        <p>Type questions like "How to get a farm loan?" or "What if my cow has a fever?" for quick, clear answers.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <a href="https://t.me/KrishiBot" target="_blank" class="cta-button" data-translate="telegram_cta">Start Chatting with @KrishiBot</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Animate timeline steps on scroll
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.animation = 'slideIn 0.8s ease-out forwards';
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.timeline-step, .telegram-section h2, .telegram-section p, .cta-button').forEach(el => {
+        observer.observe(el);
+    });
+
+    // Reset scroll position on load
+    document.addEventListener('DOMContentLoaded', () => {
+        window.scrollTo(0, 0);
+    });
+</script>
+{% endblock %}

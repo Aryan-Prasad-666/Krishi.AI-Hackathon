@@ -23,11 +23,18 @@ import pypdf
 import docx
 from datetime import datetime
 from datetime import timedelta 
+from mem0 import MemoryClient
+
+gemini_api_key = os.getenv('GEMINI_API_KEY')
+serper_api_key = os.getenv('SERPER_API_KEY')
+mem0_api_key = os.getenv('MEM0_API_KEY')
+
 
 load_dotenv()
 app = Flask(__name__)
 
 app.secret_key = os.getenv("SECRET_KEY") 
+mem0_client = MemoryClient(api_key=mem0_api_key)
 
 
 def init_db():
@@ -44,12 +51,6 @@ def init_db():
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-
-
-
-gemini_api_key = os.getenv('GEMINI_API_KEY')
-serper_api_key = os.getenv('SERPER_API_KEY')
-mem0_api_key = os.getenv('MEM0_API_KEY')
 
 llm = LLM(
     model="gemini/gemini-2.0-flash",
@@ -88,7 +89,21 @@ class CropPlan(BaseModel):
     cultivation_tips: str
     expected_yield: str
 
+legal_assistant_history = InMemoryChatMessageHistory()
+veterinary_assistant_history = InMemoryChatMessageHistory()
+financial_assistant_history = InMemoryChatMessageHistory()
 
+def get_session_history(assistant_type: str):
+    MAX_MESSAGES = 5
+    histories = {
+        'legal': legal_assistant_history,
+        'veterinary': veterinary_assistant_history,
+        'financial': financial_assistant_history
+    }
+    history = histories.get(assistant_type, legal_assistant_history)
+    if len(history.messages) > MAX_MESSAGES:
+        history.messages = history.messages[-MAX_MESSAGES:]
+    return history
 
 
 class SchemeFilterTool(BaseTool):
@@ -428,6 +443,279 @@ def crop_planning():
             error_message = "An unexpected error occurred during crop planning. Please try again later."
 
     return render_template('crop_planning.html', plans=plans, error_message=error_message, form_submitted=form_submitted)
+
+@app.route('/legal_assistant')
+def legal_assistant():
+    lang = request.args.get('lang', 'en')
+    messages = [
+        {"role": "user" if msg.__class__.__name__ == "HumanMessage" else "assistant", "content": msg.content}
+        for msg in get_session_history('legal').messages
+    ]
+    return render_template('legal_assistant.html', lang=lang, messages=messages)
+
+@app.route('/legal_assistant', methods=['POST'])
+def legal_assistant_post():
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+
+        required_fields = ['userInput', 'language']
+        for field in required_fields:
+            if field not in data or not data[field]:
+                return jsonify({"error": f"Missing or empty field: {field}"}), 400
+
+        query = data['userInput'].strip()
+        language = data['language'].strip().lower()
+
+        valid_languages = ['en', 'hi', 'kn']
+        if language not in valid_languages:
+            logger.warning(f"Invalid language '{language}', defaulting to 'en'")
+            language = 'en'
+
+        language_names = {'en': 'English', 'hi': 'Hindi', 'kn': 'Kannada'}
+        language_name = language_names[language]
+
+        prompt_template = PromptTemplate(
+            input_variables=["query", "language_name"],
+            template=""" 
+            You are a friendly legal assistant for rural Indian farmers. Provide a clear and concise answer to the following legal question related to agricultural laws, land disputes, or government schemes. The answer must be in {language_name} and tailored to the Indian context (e.g., referencing Indian laws, government schemes, or local authorities). Limit the response to 3-5 sentences for brevity. Use simple language suitable for farmers and avoid legal jargon. If the question is too vague or unrelated to agricultural legal issues, return a polite message indicating the need for a more specific legal question.
+
+            Question: {query}
+
+            Instructions:
+            - Answer in {language_name}, using simple and clear language.
+            - Focus on practical advice or information relevant to agricultural laws, land disputes, or government schemes in India.
+            - If unsure, suggest consulting a local lawyer or government office.
+            - Do not include markdown, code fences, or additional text—only the plain text response.
+            - Do not use any special symbols like *
+            - If user is greeting, then you also greet
+
+            Example (for English):
+            For a land dispute, first check your land records at the local Tehsildar office. Ensure you have documents like the sale deed or Khatauni. File a complaint with the Tehsildar if someone encroaches on your land. You can also seek help from a local lawyer or the Legal Services Authority for free advice.
+            """
+        )
+
+        prompt = prompt_template.format(
+            query=query,
+            language_name=language_name
+        )
+
+        try:
+            logger.debug(f"Sending prompt to Gemini: {prompt[:200]}...")
+            response = langchain_llm.invoke(prompt)
+            logger.debug(f"Gemini response: {response.content}")
+
+            answer = response.content.strip()
+            if not answer:
+                logger.warning("Empty response from Gemini")
+                answer = "No answer found. Please ask a more specific legal question."
+
+            # Store the conversation in Mem0
+            mem0_client.add(
+                messages=[
+                    {"role": "user", "content": query},
+                    {"role": "assistant", "content": answer}
+                ],
+                user_id="aryan",
+                output_format="v1.1"
+            )
+
+            # Add to session history
+            session_history = get_session_history('legal')
+            session_history.add_user_message(query)
+            session_history.add_ai_message(answer)
+
+            return jsonify({"response": answer}), 200
+
+        except Exception as e:
+            logger.error(f"Gemini query error: {str(e)}")
+            return jsonify({"error": "Error processing query. Please try again later."}), 503
+
+    except Exception as e:
+        logger.error(f"Server error: {str(e)}")
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
+
+@app.route('/veterinary_assistant')
+def veterinary_assistant():
+    lang = request.args.get('lang', 'en')
+    messages = [
+        {"role": "user" if msg.__class__.__name__ == "HumanMessage" else "assistant", "content": msg.content}
+        for msg in get_session_history('veterinary').messages
+    ]
+    return render_template('veterinary_assistant.html', lang=lang, messages=messages)
+
+@app.route('/veterinary_assistant', methods=['POST'])
+def veterinary_assistant_post():
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+
+        required_fields = ['userInput', 'language']
+        for field in required_fields:
+            if field not in data or not data[field]:
+                return jsonify({"error": f"Missing or empty field: {field}"}), 400
+
+        query = data['userInput'].strip()
+        language = data['language'].strip().lower()
+
+        valid_languages = ['en', 'hi', 'kn']
+        if language not in valid_languages:
+            logger.warning(f"Invalid language '{language}', defaulting to 'en'")
+            language = 'en'
+
+        language_names = {'en': 'English', 'hi': 'Hindi', 'kn': 'Kannada'}
+        language_name = language_names[language]
+
+        prompt_template = PromptTemplate(
+            input_variables=["query", "language_name"],
+            template=""" 
+            You are a friendly veterinary assistant for rural Indian farmers. Provide a clear and concise answer to the following question related to livestock health, animal diseases, or veterinary care. The answer must be in {language_name} and tailored to the Indian context (e.g., referencing common Indian livestock, local remedies, or veterinary services). Limit the response to 3-5 sentences for brevity. Use simple language suitable for farmers and avoid technical jargon. If the question is too vague or unrelated to livestock health, return a polite message indicating the need for a more specific question.
+
+            Question: {query}
+
+            Instructions:
+            - Answer in {language_name}, using simple and clear language.
+            - Focus on practical advice or information relevant to livestock health, animal diseases, or veterinary care in India.
+            - If unsure, suggest consulting a local veterinarian or government veterinary office.
+            - Do not include markdown, code fences, or additional text—only the plain text response.
+            - Do not use any special symbols like *
+            - If user is greeting, then you also greet
+
+            Example (for English):
+            If your cow has a fever, keep it in a cool, shaded area and provide plenty of water. Check for symptoms like reduced milk or difficulty breathing. Contact a local veterinarian for medicines like paracetamol or antibiotics. You can also visit the nearest government veterinary hospital for free or low-cost treatment.
+            """
+        )
+
+        prompt = prompt_template.format(
+            query=query,
+            language_name=language_name
+        )
+
+        try:
+            logger.debug(f"Sending prompt to Gemini: {prompt[:200]}...")
+            response = langchain_llm.invoke(prompt)
+            logger.debug(f"Gemini response: {response.content}")
+
+            answer = response.content.strip()
+            if not answer:
+                logger.warning("Empty response from Gemini")
+                answer = "No answer found. Please ask a more specific veterinary question."
+
+            mem0_client.add(
+                messages=[
+                    {"role": "user", "content": query},
+                    {"role": "assistant", "content": answer}
+                ],
+                user_id="aryan",
+                output_format="v1.1"
+            )
+
+            session_history = get_session_history('veterinary')
+            session_history.add_user_message(query)
+            session_history.add_ai_message(answer)
+
+            return jsonify({"response": answer}), 200
+
+        except Exception as e:
+            logger.error(f"Gemini query error: {str(e)}")
+            return jsonify({"error": "Error processing query. Please try again later."}), 503
+
+    except Exception as e:
+        logger.error(f"Server error: {str(e)}")
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
+
+@app.route('/financial_assistant')
+def financial_assistant():
+    lang = request.args.get('lang', 'en')
+    messages = [
+        {"role": "user" if msg.__class__.__name__ == "HumanMessage" else "assistant", "content": msg.content}
+        for msg in get_session_history('financial').messages
+    ]
+    return render_template('financial_assistant.html', lang=lang, messages=messages)
+
+@app.route('/financial_assistant', methods=['POST'])
+def financial_assistant_post():
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+
+        required_fields = ['userInput', 'language']
+        for field in required_fields:
+            if field not in data or not data[field]:
+                return jsonify({"error": f"Missing or empty field: {field}"}), 400
+
+        query = data['userInput'].strip()
+        language = data['language'].strip().lower()
+
+        valid_languages = ['en', 'hi', 'kn']
+        if language not in valid_languages:
+            logger.warning(f"Invalid language '{language}', defaulting to 'en'")
+            language = 'en'
+
+        language_names = {'en': 'English', 'hi': 'Hindi', 'kn': 'Kannada'}
+        language_name = language_names[language]
+
+        prompt_template = PromptTemplate(
+            input_variables=["query", "language_name"],
+            template=""" 
+            You are a friendly financial assistant for rural Indian farmers. Provide a clear and concise answer to the following question related to agricultural loans, subsidies, or financial schemes. The answer must be in {language_name} and tailored to the Indian context (e.g., referencing Indian banks, government schemes, or local financial institutions). Limit the response to 3-5 sentences for brevity. Use simple language suitable for farmers and avoid financial jargon. If the question is too vague or unrelated to agricultural finance, return a polite message indicating the need for a more specific financial question.
+
+            Question: {query}
+
+            Instructions:
+            - Answer in {language_name}, using simple and clear language.
+            - Focus on practical advice or information relevant to agricultural loans, subsidies, or financial schemes in India.
+            - If unsure, suggest consulting a local bank or government agriculture office.
+            - Do not include markdown, code fences, or additional text—only the plain text response.
+            - Do not use any special symbols like *
+            - If user is greeting, then you also greet
+
+            Example (for English):
+            To get a farm loan, visit a nearby cooperative bank or national bank like SBI with your land documents and Kisan Credit Card. Loans under PM-KISAN offer low interest rates for small farmers. Check with your local agriculture office for subsidies on seeds or equipment. Always read loan terms carefully before signing.
+            """
+        )
+
+        prompt = prompt_template.format(
+            query=query,
+            language_name=language_name
+        )
+
+        try:
+            logger.debug(f"Sending prompt to Gemini: {prompt[:200]}...")
+            response = langchain_llm.invoke(prompt)
+            logger.debug(f"Gemini response: {response.content}")
+
+            answer = response.content.strip()
+            if not answer:
+                logger.warning("Empty response from Gemini")
+                answer = "No answer found. Please ask a more specific financial question."
+
+            # Store the conversation in Mem0
+            mem0_client.add(
+                messages=[
+                    {"role": "user", "content": query},
+                    {"role": "assistant", "content": answer}
+                ],
+                user_id="aryan",
+                output_format="v1.1"
+            )
+
+            session_history = get_session_history('financial')
+            session_history.add_user_message(query)
+            session_history.add_ai_message(answer)
+
+            return jsonify({"response": answer}), 200
+
+        except Exception as e:
+            logger.error(f"Gemini query error: {str(e)}")
+            return jsonify({"error": "Error processing query. Please try again later."}), 503
+
+    except Exception as e:
+        logger.error(f"Server error: {str(e)}")
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 @app.route('/document_analyzer')
 def document_analyzer():

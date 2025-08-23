@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block title %}Krishi.ai - About Us{% endblock %}
+
+{% block extra_css %}
+<style>
+    .about-section {
+        padding: 60px 0;
+        background-color: var(--light-color);
+    }
+    .mission-vision-card {
+        background-color: #ffffff;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+        margin-bottom: 20px;
+    }
+    .mission-vision-card:hover {
+        transform: translateY(-5px);
+    }
+    .impact-section {
+        background-color: var(--secondary-color);
+        color: var(--light-color);
+        padding: 60px 0;
+    }
+    .impact-card {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .cta-section {
+        background-color: var(--accent-color);
+        color: var(--dark-color);
+        padding: 40px 0;
+        text-align: center;
+    }
+    .cta-section a {
+        background-color: var(--secondary-color);
+        color: var(--light-color);
+        padding: 12px 30px;
+        border-radius: 30px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: background-color 0.3s ease;
+    }
+    .cta-section a:hover {
+        background-color: #3b5a34;
+    }
+    @media (max-width: 768px) {
+        .about-section, .impact-section {
+            padding: 40px 0;
+        }
+        .mission-vision-card, .impact-card {
+            margin-bottom: 30px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- About Us Section -->
+<section class="about-section">
+    <div class="container">
+        <h2 class="text-center mb-5" data-translate="about_title">About Krishi.ai</h2>
+        <p class="text-center lead mb-5" data-translate="about_description">Krishi.ai is dedicated to transforming rural India through AI-powered solutions, empowering farmers and communities with tools for agriculture, finance, governance, and livestock management.</p>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mission-vision-card">
+                    <h3 class="mb-3" data-translate="mission_title">Our Mission</h3>
+                    <p data-translate="mission_description">To bridge the gap between technology and rural India, providing accessible, multilingual AI tools that enhance productivity, financial stability, and community resilience.</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mission-vision-card">
+                    <h3 class="mb-3" data-translate="vision_title">Our Vision</h3>
+                    <p data-translate="vision_description">A thriving rural India where every farmer and community leverages AI to achieve sustainable growth, informed decision-making, and equitable opportunities.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Impact Section -->
+<section class="impact-section">
+    <div class="container">
+        <h2 class="text-center mb-5" data-translate="impact_title">Our Impact</h2>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="impact-card">
+                    <i class="fas fa-users fa-2x mb-3"></i>
+                    <h4 data-translate="impact_farmers">Farmers Supported</h4>
+                    <p data-translate="impact_farmers_description">Over 10,000 farmers empowered with AI-driven crop planning and disease management tools.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="impact-card">
+                    <i class="fas fa-rupee-sign fa-2x mb-3"></i>
+                    <h4 data-translate="impact_finance">Financial Inclusion</h4>
+                    <p data-translate="impact_finance_description">Helped 5,000+ rural households access microloans and government schemes.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="impact-card">
+                    <i class="fas fa-paw fa-2x mb-3"></i>
+                    <h4 data-translate="impact_livestock">Livestock Health</h4>
+                    <p data-translate="impact_livestock_description">Improved health outcomes for 2,000+ livestock through our veterinary assistant.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action Section -->
+<section class="cta-section">
+    <div class="container">
+        <h3 class="mb-4" data-translate="cta_title">Join Us in Empowering Rural India</h3>
+        <a href="/telegram" data-translate="cta_button">Get Started with Krishi.ai</a>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Animate cards on scroll
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate__animated', 'animate__fadeInUp');
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.mission-vision-card, .impact-card').forEach(card => {
+        observer.observe(card);
+    });
+</script>
+{% endblock %}
