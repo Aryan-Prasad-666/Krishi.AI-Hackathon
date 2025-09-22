@@ -26,7 +26,7 @@
         z-index: -1;
     }
 
-    .crop-planning-section h2 {
+    .crop-planning-section h1 {
         font-size: 38px;
         font-weight: 700;
         margin-bottom: 20px;
@@ -35,7 +35,7 @@
         letter-spacing: 1px;
     }
 
-    .crop-planning-section p {
+    .crop-planning-section p.lead {
         font-size: 18px;
         line-height: 1.6;
         max-width: 700px;
@@ -62,6 +62,13 @@
         display: flex;
         flex-direction: column;
         gap: 15px;
+    }
+
+    .form-container label {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1a3c24;
+        text-align: left;
     }
 
     .form-container input, .form-container select {
@@ -91,85 +98,75 @@
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    .form-container button:hover {
+    .form-container button:hover:not(:disabled) {
         transform: translateY(-3px);
         box-shadow: 0 6px 20px rgba(232, 185, 35, 0.6);
     }
 
-    .form-container .manual-soil-btn {
-        font-size: 14px;
-        color: #e8b923;
-        text-decoration: underline;
-        cursor: pointer;
-        margin-top: 10px;
+    .form-container button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
     }
 
-    .form-container .manual-soil-btn:hover {
-        color: #d4a017;
+    .results-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
     }
 
-    .form-container .soil-type-display {
-        font-size: 16px;
+    .results-container h2 {
+        font-size: 28px;
+        font-weight: 700;
         color: #1a3c24;
-        font-weight: 600;
-        margin-top: 10px;
+        margin-bottom: 20px;
     }
 
-    .results-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 30px;
-        padding: 0 20px;
+    .final-plan {
+        background: #fff;
+        padding: 30px;
+        border-radius: 15px;
+        border: 1px solid #e8b923;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         margin-bottom: 40px;
+        transition: transform 0.3s ease;
     }
 
-    .crop-card {
+    .final-plan:hover {
+        transform: translateY(-5px);
+    }
+
+    .final-plan p {
+        font-size: 16px;
+        line-height: 1.6;
+        color: #3a2b1f;
+    }
+
+    .history-container {
+        margin-top: 40px;
+    }
+
+    .history-item {
         background: #fff;
         padding: 20px;
         border-radius: 15px;
         border: 1px solid #e8b923;
-        position: relative;
-        overflow: hidden;
-        min-height: 250px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
     }
 
-    .crop-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 4px;
-        background: linear-gradient(90deg, #e8b923, #d4a017);
+    .history-item:hover {
+        transform: translateY(-5px);
     }
 
-    .crop-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-    }
-
-    .crop-card h3 {
-        font-size: 22px;
-        margin-bottom: 10px;
-        color: #1a3c24;
-    }
-
-    .crop-card p {
+    .history-item p {
         font-size: 16px;
+        line-height: 1.6;
         color: #3a2b1f;
-        margin-bottom: 10px;
+        margin: 0;
     }
 
-    .crop-card .label {
-        font-weight: 600;
-        color: #e8b923;
-    }
-
-    .error-message, .no-results-message {
+    .error-message {
         color: #d32f2f;
         font-size: 16px;
         margin-bottom: 20px;
@@ -178,8 +175,8 @@
         border-radius: 8px;
         border: 1px solid #d32f2f;
         max-width: 600px;
-        margin-left: auto;
-        margin-right: auto;
+        margin: 0 auto;
+        text-align: center;
     }
 
     .loading-overlay {
@@ -192,7 +189,7 @@
         display: none;
         justify-content: center;
         align-items: center;
-        z-index: 2000;
+        z-index: 9999;
     }
 
     .spinner {
@@ -209,22 +206,41 @@
         100% { transform: rotate(360deg); }
     }
 
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
     @media (max-width: 768px) {
-        .crop-planning-section h2 {
+        .crop-planning-section {
+            padding: 40px 15px;
+        }
+
+        .crop-planning-section h1 {
             font-size: 32px;
         }
 
-        .crop-planning-section p {
+        .crop-planning-section p.lead {
             font-size: 16px;
         }
 
         .form-container {
-            padding: 15px;
             margin: 0 15px;
+            padding: 15px;
         }
 
-        .crop-card {
-            min-height: 300px;
+        .results-container {
+            padding: 15px;
+        }
+
+        .final-plan, .history-item {
+            padding: 15px;
         }
     }
 </style>
@@ -237,227 +253,128 @@
 
 <div class="crop-planning-section">
     <div class="container mx-auto">
-        <h2 data-translate="crop_planning_title">Crop Planning</h2>
-        <p data-translate="crop_planning_description">Enter your location, season, and land details to get personalized crop recommendations for your farm.</p>
+        <h1 data-translate="crop_planning_title">Crop Planning</h1>
+        <p class="lead" data-translate="crop_planning_description">Enter your location, plan duration, and preferred language to get a personalized crop plan for your farm.</p>
 
         <div class="form-container">
-            <form id="cropPlanningForm" method="POST" action="/crop_planning">
+            <form id="cropPlanningForm">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label for="location" class="block text-sm font-medium text-gray-700">Location</label>
-                        <input type="text" id="location" name="location" class="mt-1" placeholder="e.g., Assam" data-translate-placeholder="form_location_placeholder" required>
+                        <label for="location">Location</label>
+                        <input type="text" id="location" name="location" required>
                     </div>
                     <div>
-                        <label for="season" class="block text-sm font-medium text-gray-700">Season</label>
-                        <select id="season" name="season" class="mt-1" data-translate-placeholder="form_season_placeholder" required>
-                            <option value="" disabled selected>Select season</option>
-                            <option value="Kharif">Kharif</option>
-                            <option value="Rabi">Rabi</option>
-                            <option value="Zaid">Zaid</option>
+                        <label for="plan_duration">Plan Duration (months)</label>
+                        <input type="number" id="plan_duration" name="plan_duration" min="1" step="1" required>
+                    </div>
+                    <div>
+                        <label for="language">Language</label>
+                        <select id="language" name="language" required>
+                            <option value="" disabled selected>Select language</option>
+                            <option value="English">English</option>
+                            <option value="Hindi">Hindi</option>
+                            <option value="Kannada">Kannada</option>
+                            <option value="Malayalam">Malayalam</option>
                         </select>
-                    </div>
-                    <div>
-                        <label for="soil_type" class="block text-sm font-medium text-gray-700">Soil Type</label>
-                        <select id="soil_type" name="soil_type" class="mt-1" data-translate-placeholder="form_soil_type_placeholder" required>
-                            <option value="" disabled selected>Select soil type</option>
-                            <option value="Alluvial">Alluvial</option>
-                            <option value="Black">Black</option>
-                            <option value="Red">Red</option>
-                            <option value="Laterite">Laterite</option>
-                            <option value="Sandy">Sandy</option>
-                        </select>
-                        <p id="soilTypeDisplay" class="soil-type-display hidden"></p>
-                        <span id="manualSoilBtn" class="manual-soil-btn hidden" data-translate="manual_soil_btn">Select soil type manually</span>
-                    </div>
-                    <div>
-                        <label for="land_size" class="block text-sm font-medium text-gray-700">Land Size (acres)</label>
-                        <input type="number" id="land_size" name="land_size" step="0.1" min="0" class="mt-1" placeholder="e.g., 2.5" data-translate-placeholder="form_land_size_placeholder" required>
                     </div>
                 </div>
-                <button type="submit" id="submitBtn" class="mt-4" data-translate="form_submit">Get Crop Recommendations</button>
+                <button type="submit" id="submitBtn">Generate Crop Plan</button>
             </form>
         </div>
 
-        {% if error_message %}
-        <div class="error-message" id="errorMessage">{{ error_message }}</div>
-        {% endif %}
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
 
-        {% if form_submitted and plans %}
-        <h3 data-translate="crop_results_title">Recommended Crops</h3>
-        <div class="results-grid">
-            {% for plan in plans %}
-            <div class="crop-card">
-                <h3>{{ plan.crop_name }}</h3>
-                <p><span class="label">Sowing Time:</span> {{ plan.sowing_time }}</p>
-                <p><span class="label">Cultivation Tips:</span> {{ plan.cultivation_tips }}</p>
-                <p><span class="label">Expected Yield:</span> {{ plan.expected_yield }}</p>
+        <div id="resultsContainer" class="results-container" style="display: none;">
+            <h2 data-translate="final_plan_title">Final Crop Plan</h2>
+            <div class="final-plan">
+                <p id="finalPlan"></p>
             </div>
-            {% endfor %}
+
+            <div class="history-container">
+                <h2 data-translate="history_title">Planning History</h2>
+                <div id="historyList"></div>
+            </div>
         </div>
-        {% elif form_submitted and not plans %}
-        <p class="no-results-message" id="noResultsMessage" data-translate="no_results">No crop recommendations found for your criteria.</p>
-        {% endif %}
     </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-
-        translations.en = {
-        ...translations.en || {},
-        crop_planning_title: "Crop Planning",
-        crop_planning_description: "Enter your location, season, and land details to get personalized crop recommendations for your farm.",
-        form_location_placeholder: "e.g., Assam",
-        form_season_placeholder: "Select season",
-        form_soil_type_placeholder: "Select soil type",
-        form_land_size_placeholder: "e.g., 2.5",
-        form_submit: "Get Crop Recommendations",
-        manual_soil_btn: "Select soil type manually",
-        crop_results_title: "Recommended Crops",
-        no_results: "No crop recommendations found for your criteria."
-    };
-
-    translations.hi = {
-        ...translations.hi || {},
-        crop_planning_title: "फसल योजना",
-        crop_planning_description: "अपने खेत के लिए व्यक्तिगत फसल सिफारिशें प्राप्त करने के लिए अपनी स्थान, मौसम और भूमि विवरण दर्ज करें।",
-        form_location_placeholder: "उदाहरण, असम",
-        form_season_placeholder: "मौसम चुनें",
-        form_soil_type_placeholder: "मिट्टी का प्रकार चुनें",
-        form_land_size_placeholder: "उदाहरण, 2.5",
-        form_submit: "फसल सिफारिशें प्राप्त करें",
-        manual_soil_btn: "मिट्टी का प्रकार मैन्युअल रूप से चुनें",
-        crop_results_title: "अनुशंसित फसलें",
-        no_results: "आपके मानदंडों के लिए कोई फसल सिफारिशें नहीं मिलीं।"
-    };
-
-    translations.kn = {
-        ...translations.kn || {},
-        crop_planning_title: "ಬೆಳೆ ಯೋಜನೆ",
-        crop_planning_description: "ನಿಮ್ಮ ಜಮೀನಿಗೆ ವೈಯಕ್ತಿಕ ಬೆಳೆ ಶಿಫಾರಸುಗಳನ್ನು ಪಡೆಯಲು ನಿಮ್ಮ ಸ್ಥಳ, ಋತು ಮತ್ತು ಭೂಮಿಯ ವಿವರಗಳನ್ನು ನಮೂದಿಸಿ.",
-        form_location_placeholder: "ಉದಾಹರಣೆಗೆ, ಅಸ್ಸಾಂ",
-        form_season_placeholder: "ಋತು ಆಯ್ಕೆಮಾಡಿ",
-        form_soil_type_placeholder: "ಮಣ್ಣಿನ ಪ್ರಕಾರವನ್ನು ಆಯ್ಕೆಮಾಡಿ",
-        form_land_size_placeholder: "ಉದಾಹರಣೆಗೆ, 2.5",
-        form_submit: "ಬೆಳೆ ಶಿಫಾರಸುಗಳನ್ನು ಪಡೆಯಿರಿ",
-        manual_soil_btn: "ಮಣ್ಣಿನ ಪ್ರಕಾರವನ್ನು ಕೈಯಾರೆ ಆಯ್ಕೆಮಾಡಿ",
-        crop_results_title: "ಶಿಫಾರಸು ಮಾಡಲಾದ ಬೆಳೆಗಳು",
-        no_results: "ನಿಮ್ಮ ಮಾನದಂಡಗಳಿಗೆ ಯಾವುದೇ ಬೆಳೆ ಶಿಫಾರಸುಗಳು ಕಂಡುಬಂದಿಲ್ಲ."
-    };
-    // Animate elements on scroll
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.animation = 'fadeInUp 1s ease-out forwards';
-            }
-        });
-    }, { threshold: 0.2 });
-
-    document.querySelectorAll('.crop-card, .crop-planning-section h2, .crop-planning-section h3, .crop-planning-section p, .form-container').forEach(el => {
-        observer.observe(el);
-    });
-
     // Form handling
     const form = document.getElementById('cropPlanningForm');
-    const locationInput = document.getElementById('location');
-    const soilTypeInput = document.getElementById('soil_type');
-    const soilTypeDisplay = document.getElementById('soilTypeDisplay');
-    const manualSoilBtn = document.getElementById('manualSoilBtn');
     const submitBtn = document.getElementById('submitBtn');
     const loadingOverlay = document.getElementById('loadingOverlay');
     const errorMessage = document.getElementById('errorMessage');
+    const resultsContainer = document.getElementById('resultsContainer');
+    const historyList = document.getElementById('historyList');
+    const finalPlan = document.getElementById('finalPlan');
 
-    // Function to show error message
+    // Show error
     function showError(message) {
-        if (errorMessage) {
-            errorMessage.textContent = message;
-            errorMessage.classList.remove('hidden');
-        } else {
-            console.error('No error message element found, logging:', message);
-        }
+        console.error('Error:', message);
+        errorMessage.textContent = message;
+        errorMessage.style.display = 'block';
+        resultsContainer.style.display = 'none';
+        loadingOverlay.style.display = 'none';
+        submitBtn.disabled = false;
     }
 
-    // Function to fetch soil type based on location
-    async function fetchSoilType(location) {
-        try {
-            console.log('Fetching soil type for:', location);
-            const response = await fetch('/api/get_soil_type', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ location })
-            });
-            const data = await response.json();
-            console.log('Soil type response:', data);
-            if (data.soil_type && data.soil_type !== 'Unknown') {
-                soilTypeInput.value = data.soil_type;
-                soilTypeDisplay.textContent = `Detected Soil Type: ${data.soil_type}`;
-                soilTypeDisplay.classList.remove('hidden');
-                manualSoilBtn.classList.remove('hidden');
-                if (errorMessage) errorMessage.classList.add('hidden');
-            } else {
-                soilTypeInput.value = '';
-                soilTypeDisplay.classList.add('hidden');
-                manualSoilBtn.classList.add('hidden');
-                showError('Unable to detect soil type. Please select manually.');
-            }
-        } catch (error) {
-            console.error('Error fetching soil type:', error);
-            soilTypeInput.value = '';
-            soilTypeDisplay.classList.add('hidden');
-            manualSoilBtn.classList.add('hidden');
-            showError('Error detecting soil type. Please select manually.');
-        }
-    }
-
-    // Event listener for location input change with debouncing
-    let debounceTimer = null;
-    locationInput.addEventListener('blur', () => {
-        const location = locationInput.value.trim();
-        if (location) {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => {
-                fetchSoilType(location);
-            }, 500);
-        }
-    });
-
-    // Event listener for manual soil type selection
-    manualSoilBtn.addEventListener('click', () => {
-        soilTypeInput.value = '';
-        soilTypeDisplay.classList.add('hidden');
-        manualSoilBtn.classList.add('hidden');
-        showError('Please select a soil type manually.');
-    });
-
-    // Form submission handler
-    form.addEventListener('submit', (event) => {
-        const formData = new FormData(form);
-        const location = formData.get('location').trim();
-        const season = formData.get('season');
-        const soilType = formData.get('soil_type');
-        const landSize = formData.get('land_size').trim();
-
-        if (!location || !season || !soilType || !landSize) {
-            event.preventDefault();
-            showError('Please fill in all required fields.');
-            return;
-        }
-
-        if (parseFloat(landSize) <= 0) {
-            event.preventDefault();
-            showError('Land size must be a positive number.');
-            return;
-        }
-
+    // Generate plan
+    async function generatePlan(event) {
+        event.preventDefault();
+        errorMessage.style.display = 'none';
+        resultsContainer.style.display = 'none';
         loadingOverlay.style.display = 'flex';
         submitBtn.disabled = true;
-        if (errorMessage) errorMessage.classList.add('hidden');
-    });
 
-    // Hide loader when page loads
+        const location = document.getElementById("location").value;
+        const plan_duration = document.getElementById("plan_duration").value;
+        const language = document.getElementById("language").value;
+
+        try {
+            const response = await fetch('/crop_planning_data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ location, plan_duration, language })
+            });
+
+            if (!response.ok) {
+                throw new Error("Server error: " + response.status);
+            }
+
+            const data = await response.json();
+            console.log("Response:", data);
+
+            // Fill results
+            historyList.innerHTML = "";
+            if (data.history && data.history.length > 0) {
+                data.history.forEach(item => {
+                    const div = document.createElement("div");
+                    div.className = "history-item";
+                    const p = document.createElement("p");
+                    p.textContent = item;
+                    div.appendChild(p);
+                    historyList.appendChild(div);
+                });
+            }
+            finalPlan.textContent = data.final_plan || "No plan generated.";
+
+            resultsContainer.style.display = 'block';
+            loadingOverlay.style.display = 'none';
+            submitBtn.disabled = false;
+        } catch (error) {
+            showError("Failed to fetch crop plan. " + error.message);
+        }
+    }
+
+    // Attach handler
+    form.addEventListener("submit", generatePlan);
+
+    // Debug
     document.addEventListener('DOMContentLoaded', () => {
         loadingOverlay.style.display = 'none';
+        console.log('Page loaded, loader hidden');
     });
 </script>
 {% endblock %}

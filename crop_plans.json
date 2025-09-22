@@ -1,0 +1,26 @@
+[
+  {
+    "crop_name": "Red gram (Pigeonpea)",
+    "sowing_time": "June - July (with onset of monsoon)",
+    "cultivation_tips": "Red gram thrives in well-drained red soils under rainfed conditions. Ensure deep summer ploughing to destroy crop residues and prepare a fine seedbed. Apply judicious amounts of fertilizers, especially phosphorus, as poor soils benefit significantly from amendments. Inter-cultivation is crucial for effective weed control. Consider high-yielding varieties suitable for the region. Adequate soil moisture during flowering and grain filling is critical.",
+    "expected_yield": "8-12 quintals per acre"
+  },
+  {
+    "crop_name": "Ragi (Finger Millet)",
+    "sowing_time": "May - July (Kharif season)",
+    "cultivation_tips": "Ragi prefers porous and well-drained loam to light red loam soils with a pH range of 4.5 to 7.5. Prepare a well-pulverized seedbed. Apply 5 tons/hectare of FYM or compost and incorporate it into the soil before sowing. For red soil, provide the first irrigation immediately after sowing and the second on the third day to soften any hard crust. Maintain an optimum plant population of 4-5 lakhs per hectare through line sowing (22.5 cm apart).",
+    "expected_yield": "8-10 quintals per acre (rainfed with good practices)"
+  },
+  {
+    "crop_name": "Groundnut (Peanut)",
+    "sowing_time": "June - July (early sowing is recommended for Kharif)",
+    "cultivation_tips": "Groundnut grows best in well-drained sandy loam to red sandy loamy soils with a pH between 5.5 and 7.0. Deep plowing (20-30 cm) is essential to loosen the soil for proper peg penetration and pod development. Incorporate 8 tons/acre of well-decomposed manure before sowing. Apply 20 kg Nitrogen, 40 kg Phosphorus (P2O5), and 60 kg Potassium (K2O) per hectare as basal fertilizer. Seed treatment with Rhizobium can enhance nitrogen fixation.",
+    "expected_yield": "7-10 quintals per acre"
+  },
+  {
+    "crop_name": "Maize (Corn)",
+    "sowing_time": "June - July (Kharif season)",
+    "cultivation_tips": "Maize thrives on deep, well-drained, fertile loamy or silty loam soils, including red soil, with a pH of 5.5 to 7.0. Apply 25-30 cartloads of farmyard manure or compost during land preparation. Timely sowing is crucial for optimal yields. Ensure proper plant density and balanced nutrient application based on soil tests. Adequate moisture is essential, especially during critical growth stages.",
+    "expected_yield": "20-25 quintals per acre"
+  }
+]

@@ -1,2 +1,6 @@
 .env
 backup
+test.py
+*.pptx
+*.pdf
+*.docx

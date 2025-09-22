@@ -3,27 +3,27 @@
   {
     "title": "Tomato Late Blight - Identification and Management",
     "link": "https://barron.extension.wisc.edu/files/2023/02/Tomato-Late-Blight.pdf",
-    "summary": "This PDF guide from UW-Madison Extension outlines strategies for managing late blight in tomatoes, including planting resistant cultivars, eliminating volunteer plants, improving airflow through proper spacing, and applying preventive and effective fungicides to avoid infection."
+    "summary": "This guide from the University of Wisconsin-Extension provides comprehensive strategies for managing late blight in tomatoes, including planting resistant cultivars, eliminating volunteer plants, and other cultural practices for effective control."
   },
   {
-    "title": "Late blight of Tomato - NC State Extension",
+    "title": "Late blight of Tomato",
     "link": "https://www.ces.ncsu.edu/wp-content/uploads/2013/06/Tomato_late_blight_ki.pdf",
-    "summary": "This NC State Extension PDF provides information on late blight in home gardens, noting that once plants are infected, weekly fungicide sprays are crucial for protection. It emphasizes the aggressive nature of the disease and the importance of early intervention."
+    "summary": "This NC State Extension document details the identification of late blight symptoms on tomato leaves, describing them as irregularly shaped, water-soaked lesions, and likely offers information on the disease cycle and management strategies."
   },
   {
-    "title": "Garden Guide - Tomatoes - Organic Late Blight Prevention",
-    "link": "https://reemscreek.com/wp-content/uploads/2023/07/Garden-Guide-Tomatoes-Organic-Late-Blight-Prevention-2.pdf",
-    "summary": "This organic prevention guide for tomato late blight suggests a weekly organic spray schedule starting at planting time, recommending products like Monterey Complete Organic Disease Control (Bacillus subtilis var. amyloliquefaciens)."
+    "title": "Understanding Late Blight of Tomatoes",
+    "link": "https://extension.wvu.edu/files/d/21601b2f-ce49-41ed-b046-c8819678ce2/late-blight-of-tomatoes.pdf",
+    "summary": "This fact sheet from WVU Extension explains the fundamental aspects of late blight in tomatoes, identifies the causal agent (Phytophthora infestans), and provides practical methods for its control and prevention."
   },
   {
-    "title": "Understanding Late Blight of Tomatoes | WVU Extension",
-    "link": "https://extension.wvu.edu/files/d/21601b2f-ce49-41ed-b046-c88196789ce2/late-blight-of-tomatoes.pdf",
-    "summary": "This fact sheet from WVU Extension explains the fundamentals of late blight in tomatoes, caused by Phytophthora infestans, and offers practical control methods. It covers identification and management strategies to combat this destructive disease."
+    "title": "Late Blight of Tomato and Potato",
+    "link": "https://www.extension.purdue.edu/extmedia/bp/bp-80-w.pdf",
+    "summary": "This Purdue Extension bulletin examines late blight as it affects both tomato and potato plants. It covers the disease cycle, typical symptoms, and various management options for effective control in both crops."
   },
   {
-    "title": "Late Blight - Cornell Vegetables",
-    "link": "https://www.vegetables.cornell.edu/crops/tomatoes/late-blight/late-blight-printer-friendly-pdf/",
-    "summary": "This resource from Cornell Vegetables provides comprehensive information on late blight, including identification, management, and approved fungicide treatments. It offers a printer-friendly PDF version for easy access to detailed guidance."
+    "title": "Managing Late Blight in the Organic Tomato Crop",
+    "link": "https://sheboygan.extension.wisc.edu/files/2010/05/Tomato-Late-Blight-Complet-Fact-Sheet.pdf",
+    "summary": "This University of Wisconsin-Extension fact sheet specifically addresses the management of late blight in organic tomato cultivation. It introduces late blight as a destructive disease caused by Phytophthora infestans and offers guidance tailored for organic growers."
   }
 ]
 ```
