@@ -1,80 +1,62 @@
 [
   {
-    "name": "Mukhya Mantri Krishi Sa Sajuli Yozana (MMKSSY)",
-    "category": "Financial Assistance, Farm Mechanization",
-    "description": "Financial assistance of \u20b95000/- will be provided to each eligible small and marginal farmer in Assam to procure farm tools/implements.",
+    "name": "NMAET: Sub-Mission on Agricultural Mechanization (SMAM)",
+    "category": "Agricultural Mechanization",
+    "description": "Promotes agricultural mechanization among farmers.",
+    "link": "https://diragri.assam.gov.in/portlet-innerpage/schemes-and-program-0"
+  },
+  {
+    "name": "Mukhya Mantri Krishi Sa Sajuli Yojana (MMKSSY)",
+    "category": "Farm Tools/Mechanization",
+    "description": "Aims to boost farm productivity by providing \u20b95000 to 5 lakh farmers for farm tools via direct transfer.",
     "link": "https://www.myscheme.gov.in/schemes/mmkssy-assam"
   },
   {
-    "name": "Assam Farmer's Credit Subsidy Scheme (AFCSS)",
-    "category": "Credit/Loan Subsidy",
-    "description": "Provides 25% reimbursement (subsidy) on short term crop loans up to a maximum cap of Rs. 25000, aiming to offer partial crop loan waiver to farmers in Assam.",
-    "link": "https://schemes.vikaspedia.in/viewcontent/schemesall/state-specific-schemes/welfare-schemes-of-assam/assam-farmer-s-credit-subsidy-scheme--afcss-?lgn=en"
+    "name": "PM-KISAN (Pradhan Mantri Kisan Samman Nidhi Yojana)",
+    "category": "Income Support",
+    "description": "Provides income support of \u20b96,000 per year to all eligible farmer families.",
+    "link": "https://farmonaut.com/asia/current-agriculture-schemes-in-assam-india-2025"
   },
   {
-    "name": "Distribution Of Tractor Unit Under CMSGUY",
-    "category": "Farm Mechanization, Subsidy",
-    "description": "Under the Samagra Gramya Unnayan Yojana (CMSGUY), the Assam government provides one tractor along with necessary accessories at subsidized rates to farmer groups in each revenue village.",
-    "link": "https://www.myscheme.gov.in/schemes/dtu-cmsguy"
-  },
-  {
-    "name": "Assam Govt Offers 50% Farm Equipment Subsidy",
-    "category": "Farm Mechanization, Subsidy",
-    "description": "Assam government launches a scheme offering a 50% subsidy on farm equipment to boost crop yield and reduce losses for farmers.",
-    "link": "https://www.sentinelassam.com/north-east-india-news/assam-news/assam-govt-launches-50-subsidy-scheme-on-farm-equipment-to-boost-crop-yield-cut-losses"
-  },
-  {
-    "name": "Sub-Mission on Agricultural Mechanization (SMAM)",
-    "category": "Farm Mechanization, Subsidy",
-    "description": "A central scheme implemented in Assam, providing subsidies for various agricultural machinery and equipment to promote farm mechanization.",
-    "link": "https://diragri.assam.gov.in/portlet-innerpage/schemes-and-program-0"
+    "name": "Soil Health Card Scheme",
+    "category": "Soil Management",
+    "description": "Provides farmers with a Soil Health Card which carries crop-wise recommendations of nutrients and fertilizers.",
+    "link": "https://farmonaut.com/asia/current-agriculture-schemes-in-assam-india-2025"
   },
   {
     "name": "Rastriya Krishi Vikash Yojana (RKVY)",
     "category": "Agricultural Development",
-    "description": "An umbrella scheme for ensuring holistic development of agriculture and allied sectors in states, including Assam.",
-    "link": "https://morigaon.gov.in/schemes/rkvy"
-  },
-  {
-    "name": "Bringing Green Revolution to Eastern India (BGREI)",
-    "category": "Agricultural Productivity, Crop Development",
-    "description": "A central scheme aimed at increasing agricultural productivity and promoting crop development in Eastern Indian states like Assam.",
+    "description": "A broad scheme for agricultural development and allied sectors.",
     "link": "https://diragri.assam.gov.in/portlet-innerpage/schemes-and-program-0"
   },
   {
-    "name": "PM-KISAN (Pradhan Mantri Kisan Samman Nidhi)",
-    "category": "Financial Assistance",
-    "description": "Provides \u20b96000 per year to eligible farmer families in three equal installments of \u20b92000 each, directly into their bank accounts.",
-    "link": "https://www.mahindratractor.com/blog/government-schemes-for-indian-farmers-2025"
+    "name": "Bringing Green Revolution to Eastern India (BGREI)",
+    "category": "Crop Production",
+    "description": "Aims to increase agricultural productivity in Eastern India, focusing on rice and wheat.",
+    "link": "https://diragri.assam.gov.in/portlet-innerpage/schemes-and-program-0"
   },
   {
-    "name": "PMFBY (Pradhan Mantri Fasal Bima Yojana)",
-    "category": "Crop Insurance",
-    "description": "Offers crop insurance to farmers against losses arising from natural calamities, pests, and diseases.",
-    "link": "https://www.mahindratractor.com/blog/government-schemes-for-indian-farmers-2025"
+    "name": "Paramparagat Krishi Vikas Yojna (PKVY)",
+    "category": "Organic Farming",
+    "description": "Promotes organic farming through cluster approach.",
+    "link": "https://www.rkbassam.aau.ac.in/government-sheme"
   },
   {
-    "name": "PM-KMY (Pradhan Mantri Kisan Maan-Dhan Yojana)",
-    "category": "Pension, Social Security",
-    "description": "A voluntary and contributory pension scheme for small and marginal farmers, providing a minimum assured pension of Rs 3000 per month after attaining 60 years of age.",
-    "link": "https://www.pib.gov.in/PressReleaseIframePage.aspx?PRID=2002012"
+    "name": "eNAM (Electronic National Agriculture Market)",
+    "category": "Market Access",
+    "description": "An online trading platform for agricultural commodities, aiming to integrate mandis across the country.",
+    "link": "https://farmonaut.com/asia/current-agriculture-schemes-in-assam-india-2025"
   },
   {
-    "name": "Agri Clinics and Agri Business Centres Scheme (ACABC)",
-    "category": "Entrepreneurship, Advisory Services",
-    "description": "Supports agricultural graduates in establishing Agri-Clinics and Agri-Business Centres to provide expert services and advice to farmers.",
-    "link": "https://www.nabard.org/content1.aspx?id=23&catid=23&mid=530"
+    "name": "Assam Farmer's Credit Subsidy Scheme (AFCSS)",
+    "category": "Credit/Subsidy",
+    "description": "Provides 25% reimbursement (subsidy) on short term crop loans up to a maximum cap of Rs. 25000.",
+    "link": "https://en.vikaspedia.in/viewcontent/schemesall/state-specific-schemes/welfare-schemes-of-assam/assam-farmer-s-credit-subsidy-scheme--afcss-"
   },
   {
-    "name": "ATMA (Agricultural Technology Management Agency)",
-    "category": "Technology Transfer, Extension Services",
-    "description": "A scheme promoting farmer-centric agricultural extension system, facilitating technology dissemination and adoption at the local level.",
-    "link": "https://agriwelfare.gov.in/en/Major"
-  },
-  {
-    "name": "AGMARKNET",
-    "category": "Market Information",
-    "description": "Provides market information to farmers, connecting them to online markets and helping them get better prices for their produce.",
-    "link": "https://agriwelfare.gov.in/en/Major"
+    "name": "Assam Govt Launches 50% Subsidy Scheme on Farm Equipment",
+    "category": "Farm Equipment Subsidy",
+    "description": "Aims to provide advanced agricultural machinery for the cultivation of crops like paddy and pulses at a 50% subsidy.",
+    "link": "https://agriinsite.com/assam-govt-launches-50-subsidy-scheme-on-farm-equipment-to-boost-crop-yield-cut-losses/"
   }
 ]

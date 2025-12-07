@@ -36,7 +36,7 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
 
-gemini_api_key = os.getenv('GEMINI_API_KEY')
+gemini_api_key = os.getenv('ARYAN_GEMINI_KEY')
 serper_api_key = os.getenv('SERPER_API_KEY')
 mem0_api_key = os.getenv('MEM0_API_KEY')
 groq_api_key = os.getenv('groq_api_key')
