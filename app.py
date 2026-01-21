@@ -36,18 +36,24 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
 
-gemini_api_key = os.getenv('ARYAN_GEMINI_KEY')
+gemini_api_key = os.getenv('GEMINI_API_LAKKI')
 serper_api_key = os.getenv('SERPER_API_KEY')
 mem0_api_key = os.getenv('MEM0_API_KEY')
-groq_api_key = os.getenv('groq_api_key')
+groq_api_key = os.getenv('GROQ_SCAR_KEY')
 
 if not all([gemini_api_key, serper_api_key, mem0_api_key, groq_api_key]):
     raise ValueError("Missing one or more API keys in environment variables")
 
+# llm = LLM(
+#     model="gemini/gemini-2.5-flash",
+#     temperature=0.7,
+#     api_key=gemini_api_key
+# )
+
 llm = LLM(
-    model="gemini/gemini-2.5-flash",
+    model="groq/openai/gpt-oss-120b",
     temperature=0.7,
-    api_key=gemini_api_key
+    api_key=groq_api_key
 )
 
 llm_deepseek = ChatGroq(
@@ -60,16 +66,28 @@ llm_gpt = ChatGroq(
     api_key=groq_api_key,
     temperature=0.6
 )
-llm_gemini = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash",
-    api_key=gemini_api_key,
+# llm_gemini = ChatGoogleGenerativeAI(
+#     model="gemini-2.5-flash",
+#     api_key=gemini_api_key,
+#     temperature=0.6
+# )
+
+# langchain_llm = ChatGoogleGenerativeAI(
+#     model="gemini-2.5-flash",
+#     temperature=0.7,
+#     api_key=gemini_api_key
+# )
+
+llm_gemini = ChatGroq(
+    model="llama-3.3-70b-versatile",
+    api_key=groq_api_key,
     temperature=0.6
 )
 
-langchain_llm = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash",
+langchain_llm = ChatGroq(
+    model="openai/gpt-oss-120b",
     temperature=0.7,
-    api_key=gemini_api_key
+    api_key=groq_api_key
 )
 
 def init_db():
@@ -268,7 +286,9 @@ crop_planner = Agent(
     backstory="An AI agronomist specializing in crop selection and cultivation advice for Indian farmers.",
     tools=[serper_tool, soil_type_tool],
     verbose=True,
-    llm=llm
+    llm=llm,
+    reasoning=False,
+    allow_delegation=False
 )
 
 product_researcher = Agent(
@@ -277,7 +297,9 @@ product_researcher = Agent(
     backstory="An AI expert in finding and analyzing agricultural products using web search tools.",
     tools=[serper_tool],
     verbose=True,
-    llm=llm
+    llm=llm,
+    reasoning=False,
+    allow_delegation=False
 )
 
 scheme_researcher = Agent(
@@ -286,7 +308,9 @@ scheme_researcher = Agent(
     backstory="An expert in finding and filtering relevant government schemes for farmers using web search tools.",
     tools=[serper_tool, scheme_filter_tool],
     verbose=True,
-    llm=llm
+    llm=llm,
+    reasoning=False,
+    allow_delegation=False
 )
 
 symptoms_advisor = Agent(

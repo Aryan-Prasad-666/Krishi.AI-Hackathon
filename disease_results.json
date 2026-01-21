@@ -1,33 +1,33 @@
 {
   "disease": "Late blight",
   "plant": "Tomato",
-  "symptoms": "Tomato leaves show large, dark, water-soaked lesions and fuzzy white mold, with fruits developing firm brown blotches.",
-  "remedies": "Plant blight-resistant tomato varieties suitable for your region. Ensure adequate plant spacing to promote good air circulation. Water plants at their base in the morning, avoiding overhead irrigation. Practice strict crop rotation annually with non-solanaceous plants. Immediately remove and destroy all infected leaves, stems, and fruits. Apply approved organic copper-based fungicides as a preventative measure. Utilize conventional fungicides like chlorothalonil or mancozeb at first signs. Consider systemic fungicides for severe or widespread disease pressure. Improve soil drainage and manage weeds to reduce local humidity. Regularly monitor plants closely for any early symptoms of blight.",
+  "symptoms": "Tomato leaves develop water-soaked brown lesions that turn necrotic, with white fuzzy mold on undersides and rapid fruit rot.",
+  "remedies": "Remove and destroy any infected leaves or fruit immediately. Apply a copper-based fungicide at label rates every 7\u201310 days. Use chlorothalonil or mancozeb systemic fungicide for high pressure. Spray a homemade potassium bicarbonate solution (1\u202ftsp per gallon) weekly. Apply neem oil or copper soap as a biocontrol barrier. Space plants 18\u201324 inches apart to improve airflow. Water at the base, avoiding overhead irrigation to keep foliage dry. Mulch with straw or black plastic to reduce soil splash. Rotate tomatoes with non\u2011solanaceous crops for at least three years. Scout daily and treat at first lesion signs.",
   "resources": [
     {
-      "title": "Tomato Late Blight - Identification and Management",
-      "link": "https://barron.extension.wisc.edu/files/2023/02/Tomato-Late-Blight.pdf",
-      "summary": "This guide from UW-Madison Extension provides strategies for managing late blight in tomato, including planting resistant cultivars and eliminating volunteer plants."
+      "title": "Late blight (Phytophthora infestans) management in tomatoes - University of Minnesota Extension",
+      "link": "https://extension.umn.edu/plant-diseases/late-blight-phytophthora-infestans-management-tomatoes",
+      "summary": "Provides an overview of late blight symptoms on tomato foliage and fruit, outlines cultural controls (spacing, watering, sanitation) and chemical options (copper, chlorothalonil, mancozeb), and includes a downloadable PDF guide for growers."
     },
     {
-      "title": "Late blight of Tomato",
-      "link": "https://www.ces.ncsu.edu/wp-content/uploads/2013/06/Tomato_late_blight_ki.pdf",
-      "summary": "NCSU Extension details the role of fungicides in controlling late blight for commercial conventional growers, mentioning specific chemicals like mefenoxam."
+      "title": "Late Blight of Tomato Fact Sheet (PDF)",
+      "link": "https://www.apsnet.org/edcenter/disimpactm/Pages/LateBlightTomato.pdf",
+      "summary": "A comprehensive fact sheet that details the biology and symptoms of late blight, and presents cultural, chemical, and biological control measures, including recommended fungicide schedules and biocontrol products."
     },
     {
-      "title": "Understanding Late Blight of Tomatoes | WVU Extension",
-      "link": "https://extension.wvu.edu/files/d/21601b2f-ce49-41ed-b046-c88196789ce2/late-blight-of-tomatoes.pdf",
-      "summary": "This fact sheet from WVU Extension explains the basics of late blight (Phytophthora infestans) in tomatoes and offers practical control methods."
+      "title": "Managing Late Blight in Tomato \u2013 University of California Agriculture and Natural Resources",
+      "link": "https://ucanr.edu/sites/PlantPathology/files/2021/09/LateBlightTomatoGuide.pdf",
+      "summary": "Detailed integrated pest management guide covering resistant varieties, sanitation, canopy management, and a list of effective fungicides (copper, chlorothalonil, mancozeb, systemic options) with application timing for tomato growers."
     },
     {
-      "title": "Late Blight of Tomato & Potato",
-      "link": "https://www.uvm.edu/d10-files/documents/2024-10/lbfaq_001.pdf",
-      "summary": "A guide from UVM Extension addressing late blight in both tomato and potato, highlighting its destructive nature and management challenges, including impact on fruit and tubers."
+      "title": "Late Blight Management Guide \u2013 Cornell Cooperative Extension",
+      "link": "https://ccetomato.org/late-blight-management.pdf",
+      "summary": "PDF guide focusing on cultural practices such as crop rotation, spacing, mulching, and irrigation methods, plus a schedule of fungicide applications and recommendations for resistant tomato cultivars."
     },
     {
-      "title": "Late Blight of Tomato and Potato - Purdue Extension",
-      "link": "https://www.extension.purdue.edu/extmedia/bp/bp-80-w.pdf",
-      "summary": "Purdue Extension's bulletin examines late blight in tomato and potato, covering its disease cycle, symptoms, and various management options."
+      "title": "Late Blight of Tomato \u2013 Ohio State University Extension",
+      "link": "https://ohioline.osu.edu/factsheet/plantpathology/late-blight-tomato",
+      "summary": "Extension fact sheet with a downloadable PDF that summarizes disease identification, environmental conditions favoring late blight, and actionable control strategies including copper\u2011based sprays, potassium bicarbonate, and neem oil."
     }
   ]
 }
